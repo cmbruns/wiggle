@@ -19,6 +19,10 @@ class AutoInitRenderer(AbstractRenderable):
         super().__init__()
         self.is_initialized = False
 
+    def init_gl(self):
+        super().init_gl()
+        self.is_initialized = True
+
     def display_gl(self, *args, **kwargs):
         if not self.is_initialized:
             super().init_gl()
@@ -36,11 +40,6 @@ class ParentRenderer(AbstractRenderable):
         super().__init__()
         self.children = list()
 
-    def init_gl(self):
-        super().init_gl()
-        for c in self.children:
-            c.init_gl()
-
     def display_gl(self, *args, **kwargs):
         super().display_gl(*args, **kwargs)
         for c in self.children:
@@ -53,7 +52,7 @@ class ParentRenderer(AbstractRenderable):
 
 
 class VaoRenderer(AbstractRenderable):
-    """Organizes render passes and creates a default VBO"""
+    """Create a default VBO"""
     def __init__(self):
         super().__init__()
         self.vao = None
@@ -73,6 +72,3 @@ class VaoRenderer(AbstractRenderable):
             GL.glDeleteVertexArrays(1, (self.vao,))
         self.vao = None
 
-
-class BaseRenderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
-    pass

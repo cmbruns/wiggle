@@ -1,6 +1,6 @@
 from OpenGL import GL
 
-from .base import AbstractRenderable, BaseRenderer
+from .base import AbstractRenderable, AutoInitRenderer, ParentRenderer, VaoRenderer
 
 
 class ScreenClearer(AbstractRenderable):
@@ -17,7 +17,7 @@ class ScreenClearer(AbstractRenderable):
         GL.glClear(self.clear_mask)
 
 
-class RenderPass(BaseRenderer):
+class RenderPass(AutoInitRenderer, ParentRenderer):
     def __init__(self, order):
         super().__init__()
         self.order = order  # lower numbered passes are rendered before higher numbered ones
@@ -35,7 +35,7 @@ class OpaquePass(RenderPass):
         super().__init__(400)
 
 
-class Renderer(BaseRenderer):
+class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
     """Organizes render passes and creates a default VBO"""
     def __init__(self):
         super().__init__()

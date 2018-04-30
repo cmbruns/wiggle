@@ -7,8 +7,11 @@ Color cube for use in "hello world" 3D apps
 from OpenGL import GL
 from OpenGL.GL.shaders import compileShader, compileProgram
 
+from .renderer import AutoInitRenderer
+from .matrix import ModelMatrix
 
-class ColorCubeActor(object):
+
+class ColorCubeActor(AutoInitRenderer):
     """
     Draws a cube
     
@@ -22,13 +25,13 @@ class ColorCubeActor(object):
     """
     
     def __init__(self):
+        super().__init__()
         self.shader = 0
-        self.vao = None
-        self.is_initialized = False
+        self.model_matrix = ModelMatrix()
     
     def init_gl(self):
         vertex_shader = compileShader(
-            """#version 420
+            """#version 430
             // Adapted from @jherico's RiftDemo.py in pyovr
             
             layout(location = 0) uniform mat4 Projection = mat4(1);
@@ -82,7 +85,7 @@ class ColorCubeActor(object):
             """,
             GL.GL_VERTEX_SHADER)
         fragment_shader = compileShader(
-            """#version 420
+            """#version 430
             in vec3 _color;
             out vec4 FragColor;
             
@@ -92,25 +95,23 @@ class ColorCubeActor(object):
             """,
             GL.GL_FRAGMENT_SHADER)
         self.shader = compileProgram(vertex_shader, fragment_shader)
-        #
-        self.vao = GL.glGenVertexArrays(1)
-        GL.glBindVertexArray(self.vao)
-        GL.glEnable(GL.GL_DEPTH_TEST)
-        self.is_initialized = True
         
-    def display_gl(self, modelview, projection):
-        if not self.is_initialized:
-            self.init_gl()
+    def display_gl(self, camera, *args, **kwargs):
+        super().display_gl(camera, *args, **kwargs)
         GL.glUseProgram(self.shader)
-        GL.glUniformMatrix4fv(0, 1, False, projection)
-        GL.glUniformMatrix4fv(4, 1, False, modelview)
-        GL.glBindVertexArray(self.vao)
+        GL.glUniformMatrix4fv(0, 1, False, camera.projection)
+        GL.glUniformMatrix4fv(4, 1, False, camera.view_matrix)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 36)
     
     def dispose_gl(self):
         GL.glDeleteProgram(self.shader)
         self.shader = 0
-        if self.vao:
-            GL.glDeleteVertexArrays(1, (self.vao,))
-        self.vao = 0
-        self.is_initialized = False
+        super().dispose_gl()
+
+    @property
+    def model_center(self):
+        return self._model_matrix.model_center
+
+    @model_center.setter
+    def model_center(self, center):
+        self.model_matrix.model_center = center

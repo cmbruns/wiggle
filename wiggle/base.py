@@ -25,7 +25,7 @@ class AutoInitRenderer(AbstractRenderable):
 
     def display_gl(self, *args, **kwargs):
         if not self.is_initialized:
-            super().init_gl()
+            self.init_gl()
             self.is_initialized = True
         super().display_gl(*args, **kwargs)
 

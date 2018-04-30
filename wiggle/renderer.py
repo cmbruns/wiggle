@@ -29,10 +29,21 @@ class SkyPass(RenderPass):
         # Default sky box is solid gray
         self.children.append(ScreenClearer())
 
+    def display_gl(self, *args, **kwargs):
+        # The sky has no finite depth
+        GL.glDisable(GL.GL_DEPTH_TEST)  # todo: unless we render sky last?
+        GL.glDepthMask(False)
+        super().display_gl(*args, **kwargs)
+
 
 class OpaquePass(RenderPass):
     def __init__(self):
         super().__init__(400)
+
+    def display_gl(self, *args, **kwargs):
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glDepthMask(True)
+        super().display_gl(*args, **kwargs)
 
 
 class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
@@ -41,7 +52,11 @@ class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
         super().__init__()
         self.sky_pass = SkyPass()
         self.opaque_pass = OpaquePass()
-        self._inactive_passes = [self.opaque_pass]
         self.children.clear()
         self.children.append(self.sky_pass)
-        self._active_passes = self.children
+
+    def add_actor(self, actor):
+        pass_ = self.opaque_pass
+        pass_.children.append(actor)
+        if pass_ not in self.children:
+            self.children.append(pass_)

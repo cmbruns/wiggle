@@ -38,16 +38,15 @@ class ColorCubeActor(AutoInitRenderer):
             layout(location = 4) uniform mat4 ModelView = mat4(1);
             layout(location = 8) uniform float Size = 0.3;
             
-            // Minimum Y value is zero, so cube sits on the floor in room scale
             const vec3 UNIT_CUBE[8] = vec3[8](
-              vec3(-1.0, -0.0, -1.0), // 0: lower left rear
-              vec3(+1.0, -0.0, -1.0), // 1: lower right rear
-              vec3(-1.0, +2.0, -1.0), // 2: upper left rear
-              vec3(+1.0, +2.0, -1.0), // 3: upper right rear
-              vec3(-1.0, -0.0, +1.0), // 4: lower left front
-              vec3(+1.0, -0.0, +1.0), // 5: lower right front
-              vec3(-1.0, +2.0, +1.0), // 6: upper left front
-              vec3(+1.0, +2.0, +1.0)  // 7: upper right front
+              vec3(-1.0, -1.0, -1.0), // 0: lower left rear
+              vec3(+1.0, -1.0, -1.0), // 1: lower right rear
+              vec3(-1.0, +1.0, -1.0), // 2: upper left rear
+              vec3(+1.0, +1.0, -1.0), // 3: upper right rear
+              vec3(-1.0, -1.0, +1.0), // 4: lower left front
+              vec3(+1.0, -1.0, +1.0), // 5: lower right front
+              vec3(-1.0, +1.0, +1.0), // 6: upper left front
+              vec3(+1.0, +1.0, +1.0)  // 7: upper right front
             );
             
             const vec3 UNIT_CUBE_NORMALS[6] = vec3[6](

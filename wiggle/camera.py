@@ -8,10 +8,10 @@ from .matrix import Matrix4f, Matrix3f
 class PerspectiveCamera(object):
     def __init__(self):
         self._focus = numpy.array([0, 0, 0], dtype='float32')
-        # Projection
+        # View matrix
         self.distance = 10
         self.rotation = numpy.identity(4, dtype='float32')
-        #
+        # Projection
         self.fov_y = math.radians(45.0)
         self._aspect = 1.0
         self.z_near = 0.1
@@ -66,11 +66,13 @@ class PerspectiveCamera(object):
         return self._view_matrix
 
     def _update_view_matrix(self):
-        translationA = Matrix4f.translation(0, 0, -self.distance)
-        translationB = Matrix4f.translation(*self._focus)
-        m = Matrix4f(translationB @ self.rotation @ translationA)
-        # cam_pos = self.rotation @ (0, 0, -self.distance)
-        # cam_pos += self._focus
-        # m = Matrix4f.translation(*cam_pos)
+        translation_a = Matrix4f.translation(0, 0, -self.distance)
+        translation_b = Matrix4f.translation(*self._focus)
+        m = Matrix4f(translation_b @ self.rotation @ translation_a)
+
         self._view_matrix = m.pack()
         self._view_matrix_needs_update = False
+
+    def zoom(self, factor):
+        self.distance /= factor
+        self._view_matrix_needs_update = True

@@ -116,23 +116,20 @@ class Matrix4f(MatrixBase):
         return Matrix4f(self.m.T)
 
 
-class PerspectiveMatrix(Matrix4f):
-    def __init__(self):
-        self.fov_y = math.radians(45.0)
-        self.aspect = 1.0
-        self.z_near = 0.1
-        self.z_far = 100.0
-        super().__init__(Matrix4f.perspective(
-            fov_y=self.fov_y,
-            aspect=self.aspect,
-            z_near=self.z_near,
-            z_far=self.z_far,
-        ))
-
-
 class ModelMatrix(Matrix4f):
     def __init__(self):
         self._center = array([0, 0, 0], dtype='float32')
+        self._needs_update = True
+        self._matrix = None
+
+    def __matmul__(self, rhs):
+        return Matrix4f(self.matrix @ rhs)
+
+    @property
+    def matrix(self):
+        if self._needs_update:
+            self._matrix = Matrix4f.translation(*self._center).pack()
+        return self._matrix
 
     @property
     def model_center(self):
@@ -140,6 +137,7 @@ class ModelMatrix(Matrix4f):
 
     @model_center.setter
     def model_center(self, center):
+        self._needs_update = True
         self._center[:] = center[:]
 
 

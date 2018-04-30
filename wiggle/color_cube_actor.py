@@ -99,7 +99,8 @@ class ColorCubeActor(AutoInitRenderer):
         super().display_gl(camera, *args, **kwargs)
         GL.glUseProgram(self.shader)
         GL.glUniformMatrix4fv(0, 1, False, camera.projection)
-        GL.glUniformMatrix4fv(4, 1, False, camera.view_matrix)
+        model_view = self.model_matrix @ camera.view_matrix
+        GL.glUniformMatrix4fv(4, 1, False, model_view.pack())
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 36)
     
     def dispose_gl(self):

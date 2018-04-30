@@ -67,7 +67,7 @@ class PerspectiveCamera(object):
 
     def _update_view_matrix(self):
         translation_a = Matrix4f.translation(0, 0, -self.distance)
-        translation_b = Matrix4f.translation(*self._focus)
+        translation_b = Matrix4f.translation(*-self._focus)
         m = Matrix4f(translation_b @ self.rotation @ translation_a)
 
         self._view_matrix = m.pack()

@@ -36,7 +36,7 @@ class ColorCubeActor(AutoInitRenderer):
             
             layout(location = 0) uniform mat4 Projection = mat4(1);
             layout(location = 4) uniform mat4 ModelView = mat4(1);
-            layout(location = 8) uniform float Size = 0.3;
+            layout(location = 8) uniform float Size = 0.5;
             
             const vec3 UNIT_CUBE[8] = vec3[8](
               vec3(-1.0, -1.0, -1.0), // 0: lower left rear
@@ -50,12 +50,12 @@ class ColorCubeActor(AutoInitRenderer):
             );
             
             const vec3 UNIT_CUBE_NORMALS[6] = vec3[6](
-              vec3(0.0, 0.0, -1.0),
-              vec3(0.0, 0.0, 1.0),
-              vec3(1.0, 0.0, 0.0),
-              vec3(-1.0, 0.0, 0.0),
-              vec3(0.0, 1.0, 0.0),
-              vec3(0.0, -1.0, 0.0)
+              vec3( 0.0,  0.0, -1.0),
+              vec3( 0.0,  0.0,  1.0),
+              vec3(-1.0,  0.0,  0.0),
+              vec3( 1.0,  0.0,  0.0),
+              vec3( 0.0,  1.0,  0.0),
+              vec3( 0.0, -1.0,  0.0)
             );
             
             const int CUBE_INDICES[36] = int[36](

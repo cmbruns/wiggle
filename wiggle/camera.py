@@ -2,7 +2,7 @@ import math
 
 import numpy
 
-from .matrix import Matrix4f
+from .matrix import Matrix4f, Matrix3f
 
 
 class PerspectiveCamera(object):
@@ -10,7 +10,7 @@ class PerspectiveCamera(object):
         self._focus = numpy.array([0, 0, 0], dtype='float32')
         # Projection
         self.distance = 10
-        self.rotation = numpy.identity(3, dtype='float32')
+        self.rotation = numpy.identity(4, dtype='float32')
         #
         self.fov_y = math.radians(45.0)
         self._aspect = 1.0
@@ -29,7 +29,6 @@ class PerspectiveCamera(object):
     def aspect(self, aspect):
         self._projection_needs_update = True
         self._aspect = aspect
-
 
     @property
     def focus(self):
@@ -52,8 +51,13 @@ class PerspectiveCamera(object):
                 aspect=self.aspect,
                 z_near=self.z_near,
                 z_far=self.z_far)
-        self._projection = numpy.ascontiguousarray(m.m)
+        self._projection = m.pack()
         self._projection_needs_update = False
+
+    def rotate(self, axis, angle):
+        r = Matrix4f.rotation(axis, angle)
+        self.rotation = self.rotation @ r
+        self._view_matrix_needs_update = True
 
     @property
     def view_matrix(self):
@@ -62,8 +66,11 @@ class PerspectiveCamera(object):
         return self._view_matrix
 
     def _update_view_matrix(self):
-        cam_pos = self.rotation @ (0, 0, -self.distance)
-        cam_pos += self._focus
-        m = Matrix4f.translation(*cam_pos)
-        self._view_matrix = numpy.ascontiguousarray(m.m)
+        translationA = Matrix4f.translation(0, 0, -self.distance)
+        translationB = Matrix4f.translation(*self._focus)
+        m = Matrix4f(translationB @ self.rotation @ translationA)
+        # cam_pos = self.rotation @ (0, 0, -self.distance)
+        # cam_pos += self._focus
+        # m = Matrix4f.translation(*cam_pos)
+        self._view_matrix = m.pack()
         self._view_matrix_needs_update = False

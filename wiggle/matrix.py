@@ -3,13 +3,21 @@ from numpy import array, asarray, dot
 import math
 
 _identity4 = (
-        (1, 0, 0, 0),
-        (0, 1, 0, 0),
-        (0, 0, 1, 0),
-        (0, 0, 0, 1))
+    (1, 0, 0, 0),
+    (0, 1, 0, 0),
+    (0, 0, 1, 0),
+    (0, 0, 0, 1))
+
+_identity3 = (
+    (1, 0, 0),
+    (0, 1, 0),
+    (0, 0, 1))
 
 
-class Matrix4f(object):
+class MatrixBase(object):
+    def __init__(self, matrix=_identity3):
+        super().__init__(matrix)
+
     def __init__(self, matrix=_identity4):
         self.m = numpy.array(matrix[:], dtype=numpy.float32)
 
@@ -22,6 +30,28 @@ class Matrix4f(object):
     def __len__(self):
         return len(self.m)
 
+    @classmethod
+    def rotation(cls, axis, radians):
+        c = math.cos(radians)
+        s = math.sin(radians)
+        t = 1 - c
+        x, y, z = axis[:]
+        return cls(
+            ((t*x*x + c,  t*x*y - s*z, t*x*z + s*y),
+             (t*x*y + s*z, t*y*y + c,  t*y*z - s*x),
+             (t*x*z - s*y, t*y*z + s*x, t*z*z + c))
+        )
+
+
+class Matrix3f(MatrixBase):
+    def __mul__(self, rhs):
+        return Matrix3f(numpy.dot(self[:], rhs[:]))
+
+
+class Matrix4f(MatrixBase):
+    def __init__(self, matrix=_identity4):
+        super().__init__(matrix)
+
     def __mul__(self, rhs):
         if len(rhs) == 3:
             # homogeneous matrix times vector
@@ -29,9 +59,6 @@ class Matrix4f(object):
             foo.extend([1.0, ], )
             rhs = numpy.array(foo, dtype=numpy.float32)
         return Matrix4f(numpy.dot(self[:], rhs[:]))
-
-    def transpose(self):
-        return Matrix4f(self.m.T)
 
     @classmethod
     def frustum(cls, left, right, top, bottom, z_near, z_far):
@@ -50,9 +77,14 @@ class Matrix4f(object):
     def identity(cls):
         return cls(numpy.identity(4))
 
+    def pack(self, do_transpose=False):
+        if do_transpose:
+            return numpy.ascontiguousarray(self.m.T)
+        else:
+            return numpy.ascontiguousarray(self.m)
+
     @classmethod
-    def perspective(cls, fov_y=math.radians(45.0), aspect=1.0, z_near=0.1,
-                    z_far=100.0):
+    def perspective(cls, fov_y=math.radians(45.0), aspect=1.0, z_near=0.1, z_far=100.0):
         # Negate vertical, because screen Y is down, and OpenGL Y is up
         fh = -z_near * math.tan(fov_y / 2.0)
         fw = -fh * aspect
@@ -79,6 +111,9 @@ class Matrix4f(object):
              (0, 0, 1, 0),
              (x, y, z, 1),)
         )
+
+    def transpose(self):
+        return Matrix4f(self.m.T)
 
 
 class PerspectiveMatrix(Matrix4f):

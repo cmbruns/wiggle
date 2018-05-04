@@ -84,7 +84,7 @@ class Matrix4f(MatrixBase):
             return numpy.ascontiguousarray(self.m)
 
     @classmethod
-    def perspective(cls, fov_y=math.radians(45.0), aspect=1.0, z_near=0.1, z_far=100.0):
+    def perspective(cls, fov_y=math.radians(35.0), aspect=1.0, z_near=0.1, z_far=100.0):
         # Negate vertical, because screen Y is down, and OpenGL Y is up
         fh = -z_near * math.tan(fov_y / 2.0)
         fw = -fh * aspect

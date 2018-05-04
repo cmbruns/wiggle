@@ -115,3 +115,11 @@ class ColorCubeActor(AutoInitRenderer):
     @model_center.setter
     def model_center(self, center):
         self.model_matrix.model_center = center
+
+    @property
+    def scale(self):
+        return self._model_matrix.scale
+
+    @scale.setter
+    def scale(self, scale):
+        self.model_matrix.scale = scale

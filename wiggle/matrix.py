@@ -24,8 +24,8 @@ class MatrixBase(object):
     def __getitem__(self, item):
         return self.m[item]
 
-    def __imul__(self, other):
-        self.m = numpy.dot(self[:], other[:])
+    def __imatmul__(self, other):
+        self.m @= other[:]
 
     def __len__(self):
         return len(self.m)
@@ -44,21 +44,24 @@ class MatrixBase(object):
 
 
 class Matrix3f(MatrixBase):
-    def __mul__(self, rhs):
-        return Matrix3f(numpy.dot(self[:], rhs[:]))
+    def __matmul__(self, rhs):
+        return Matrix3f(self.m @ rhs)
 
 
 class Matrix4f(MatrixBase):
     def __init__(self, matrix=_identity4):
         super().__init__(matrix)
 
-    def __mul__(self, rhs):
+    def __matmul__(self, rhs):
         if len(rhs) == 3:
             # homogeneous matrix times vector
             foo = list(rhs[:])
             foo.extend([1.0, ], )
             rhs = numpy.array(foo, dtype=numpy.float32)
-        return Matrix4f(numpy.dot(self[:], rhs[:]))
+        return Matrix4f(self.m @ rhs)
+
+    def __rmul__(self, lhs):
+        return Matrix4f(lhs * self.m)
 
     @classmethod
     def frustum(cls, left, right, top, bottom, z_near, z_far):
@@ -104,6 +107,15 @@ class Matrix4f(MatrixBase):
         )
 
     @classmethod
+    def scale(cls, scale):
+        return cls(
+            ((scale, 0, 0, 0),
+             (0, scale, 0, 0),
+             (0, 0, scale, 0),
+             (0, 0, 0, 1),)
+        )
+
+    @classmethod
     def translation(cls, x, y, z):
         return cls(
             ((1, 0, 0, 0),
@@ -119,6 +131,7 @@ class Matrix4f(MatrixBase):
 class ModelMatrix(Matrix4f):
     def __init__(self):
         self._center = array([0, 0, 0], dtype='float32')
+        self._scale = 1.0
         self._needs_update = True
         self._matrix = None
 
@@ -128,7 +141,7 @@ class ModelMatrix(Matrix4f):
     @property
     def matrix(self):
         if self._needs_update:
-            self._matrix = Matrix4f.translation(*self._center).pack()
+            self._matrix = (Matrix4f.scale(self._scale) @ Matrix4f.translation(*self._center)).pack()
         return self._matrix
 
     @property
@@ -139,6 +152,15 @@ class ModelMatrix(Matrix4f):
     def model_center(self, center):
         self._needs_update = True
         self._center[:] = center[:]
+
+    @property
+    def scale(self):
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale):
+        self._needs_update = True
+        self._scale = scale
 
 
 def rotation_matrix(axis, theta):
@@ -163,7 +185,7 @@ def main():
     v = [3, 5, 0]
     axis = [4, 4, 1]
     theta = 1.2
-    print(dot(rotation_matrix(axis, theta), v))
+    print(rotation_matrix(axis, theta) @ v)
     # [ 2.74911638  4.77180932  1.91629719]
 
 

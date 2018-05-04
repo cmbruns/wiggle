@@ -21,8 +21,9 @@ class MainWindow(QMainWindow):
         self.load_test_scene()
 
     def load_test_scene(self):
-        self.camera.focus = (0, 1, 0)
+        self.camera.focus = (0, 1.2, 0)
         self.camera.distance = 5
         cube = wiggle.ColorCubeActor()
-        cube.model_center = (0, 1, 0)
+        cube.model_center = (0, 1.2, 0)
+        cube.scale = 0.3
         self.renderer.add_actor(cube)

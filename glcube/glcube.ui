@@ -69,12 +69,25 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="multisampleCheckBox">
              <property name="text">
               <string>Multisample</string>
              </property>
              <property name="checked">
               <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sampleCountSpinBox">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>32</number>
+             </property>
+             <property name="value">
+              <number>4</number>
              </property>
             </widget>
            </item>
@@ -208,7 +221,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>checkBox</sender>
+   <sender>multisampleCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>actionMultisample</receiver>
    <slot>setChecked(bool)</slot>
@@ -220,6 +233,22 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>multisampleCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sampleCountSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>617</x>
+     <y>116</y>
     </hint>
    </hints>
   </connection>

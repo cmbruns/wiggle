@@ -16,12 +16,15 @@ class MainWindow(QMainWindow):
         self.renderer = wiggle.Renderer()
         self.load_test_scene()
         self._setup_canvas()
+        self.multisample_count = self.sampleCountSpinBox.value()
+        self.b_multisample = self.multisampleCheckBox.checkState()
 
     def _setup_ui(self):
         uic.loadUi(uifile=pkg_resources.resource_stream('glcube', 'glcube.ui'), baseinstance=self)
         self.openGLWidget.main_window = self
         self.actionQuit.triggered.connect(QCoreApplication.quit)
         self.actionMultisample.toggled.connect(self.toggle_multisampling)
+        self.sampleCountSpinBox.valueChanged.connect(self.set_multisamples)
 
     def _setup_canvas(self):
         self.openGLWidget.camera = self.camera
@@ -29,10 +32,6 @@ class MainWindow(QMainWindow):
 
     def _replace_canvas(self, new_canvas):
         old_canvas = self.openGLWidget
-        old_canvas.makeCurrent()
-        if self.renderer is not None:
-            self.renderer.dispose_gl()
-        old_canvas.doneCurrent()
         self.sceneContainer.layout().removeWidget(old_canvas)
         self.sceneContainer.layout().addWidget(new_canvas)
         self.openGLWidget = new_canvas
@@ -47,12 +46,20 @@ class MainWindow(QMainWindow):
         cube.scale = 0.3
         self.renderer.add_actor(cube)
 
-    def toggle_multisampling(self, checked):
-        samples = 0
-        if checked:
-            samples = 4
-        new_canvas = glcube.scene_canvas.SceneCanvas(self.sceneContainer, samples=samples)
+    def set_multisamples(self, sample_count):
+        self.multisample_count = sample_count
+        if self.b_multisample:
+            self._change_multisamples(sample_count)
+
+    def _change_multisamples(self, sample_count):
+        new_canvas = glcube.scene_canvas.SceneCanvas(self.sceneContainer, samples=sample_count)
         self._replace_canvas(new_canvas)
-        self.update()
-        # TODO: cube is not drawing right away
-        print(checked)
+        QCoreApplication.processEvents()  # required for repaint below to take
+        self.openGLWidget.repaint()
+
+    def toggle_multisampling(self, checked):
+        self.b_multisample = checked
+        if checked:
+            self._change_multisamples(self.multisample_count)
+        else:
+            self._change_multisamples(0)

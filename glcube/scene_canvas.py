@@ -20,9 +20,9 @@ class SceneCanvas(QOpenGLWidget):
         self.mouse_location = None
         self.renderer = None
         self.camera = wiggle.PerspectiveCamera()
-        format = QSurfaceFormat()
-        format.setSamples(samples)
-        self.setFormat(format)
+        format_ = QSurfaceFormat()
+        format_.setSamples(samples)
+        self.setFormat(format_)
 
     def initializeGL(self):
         super().initializeGL()

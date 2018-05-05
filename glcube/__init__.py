@@ -24,8 +24,3 @@ class GlCubeApplication(QApplication):
 
     def run(self):
         sys.exit(self.exec_())
-
-
-if __name__ == '__main__':
-    app = GlCubeApplication(sys.argv)
-    app.run()

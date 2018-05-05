@@ -1,4 +1,4 @@
 from .renderer import *
-from .color_cube_actor import ColorCubeActor
+from wiggle.actor.color_cube_actor import ColorCubeActor
 from .camera import PerspectiveCamera
-from .wireframe_cube_actor import WireframeCubeActor
+from wiggle.actor.wireframe_cube_actor import WireframeCubeActor

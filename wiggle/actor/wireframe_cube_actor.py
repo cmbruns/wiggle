@@ -1,11 +1,10 @@
 from OpenGL import GL
 from OpenGL.GL.shaders import compileShader, compileProgram
 
-from .renderer import AutoInitRenderer
-from .matrix import ModelMatrix
+from wiggle.actor.base_actor import BaseActor
 
 
-class WireframeCubeActor(AutoInitRenderer):
+class WireframeCubeActor(BaseActor):
     """
     Draws a cube
     
@@ -17,11 +16,6 @@ class WireframeCubeActor(AutoInitRenderer):
       |/______|/
       4       5
     """
-    
-    def __init__(self):
-        super().__init__()
-        self.shader = 0
-        self.model_matrix = ModelMatrix()
     
     def init_gl(self):
         vertex_shader = compileShader(
@@ -69,30 +63,5 @@ class WireframeCubeActor(AutoInitRenderer):
         
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glUseProgram(self.shader)
-        GL.glUniformMatrix4fv(0, 1, False, camera.projection)
-        model_view = self.model_matrix @ camera.view_matrix
-        GL.glUniformMatrix4fv(4, 1, False, model_view.pack())
         GL.glLineWidth(3)
         GL.glDrawArrays(GL.GL_LINES, 0, 24)
-    
-    def dispose_gl(self):
-        GL.glDeleteProgram(self.shader)
-        self.shader = 0
-        super().dispose_gl()
-
-    @property
-    def model_center(self):
-        return self._model_matrix.model_center
-
-    @model_center.setter
-    def model_center(self, center):
-        self.model_matrix.model_center = center
-
-    @property
-    def scale(self):
-        return self._model_matrix.scale
-
-    @scale.setter
-    def scale(self, scale):
-        self.model_matrix.scale = scale

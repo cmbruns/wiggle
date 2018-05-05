@@ -7,11 +7,10 @@ Color cube for use in "hello world" 3D apps
 from OpenGL import GL
 from OpenGL.GL.shaders import compileShader, compileProgram
 
-from .renderer import AutoInitRenderer
-from .matrix import ModelMatrix
+from wiggle.actor.base_actor import BaseActor
 
 
-class ColorCubeActor(AutoInitRenderer):
+class ColorCubeActor(BaseActor):
     """
     Draws a cube
     
@@ -23,12 +22,7 @@ class ColorCubeActor(AutoInitRenderer):
       |/______|/
       4       5
     """
-    
-    def __init__(self):
-        super().__init__()
-        self.shader = 0
-        self.model_matrix = ModelMatrix()
-    
+
     def init_gl(self):
         vertex_shader = compileShader(
             """#version 430
@@ -97,29 +91,4 @@ class ColorCubeActor(AutoInitRenderer):
         
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glUseProgram(self.shader)
-        GL.glUniformMatrix4fv(0, 1, False, camera.projection)
-        model_view = self.model_matrix @ camera.view_matrix
-        GL.glUniformMatrix4fv(4, 1, False, model_view.pack())
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 36)
-    
-    def dispose_gl(self):
-        GL.glDeleteProgram(self.shader)
-        self.shader = 0
-        super().dispose_gl()
-
-    @property
-    def model_center(self):
-        return self._model_matrix.model_center
-
-    @model_center.setter
-    def model_center(self, center):
-        self.model_matrix.model_center = center
-
-    @property
-    def scale(self):
-        return self._model_matrix.scale
-
-    @scale.setter
-    def scale(self, scale):
-        self.model_matrix.scale = scale

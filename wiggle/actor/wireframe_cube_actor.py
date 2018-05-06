@@ -44,6 +44,24 @@ class WireframeCubeActor(BaseActor):
               2, 6,  3, 7,  1, 5,  0, 4
             );
             
+            const vec3 UNIT_CUBE_NORMALS[6] = vec3[6](
+              vec3( 0.0,  0.0, -1.0),
+              vec3( 0.0,  0.0,  1.0),
+              vec3(-1.0,  0.0,  0.0),
+              vec3( 1.0,  0.0,  0.0),
+              vec3( 0.0,  1.0,  0.0),
+              vec3( 0.0, -1.0,  0.0)
+            );
+            
+            const int CUBE_INDICES[36] = int[36](
+              0, 1, 2, 2, 1, 3, // front
+              4, 6, 5, 6, 5, 7, // back
+              0, 2, 4, 4, 2, 6, // left
+              1, 3, 5, 5, 3, 7, // right
+              2, 6, 3, 6, 3, 7, // top
+              0, 1, 4, 4, 1, 5  // bottom
+            );
+            
             void main() {
               int vertexIndex = EDGE_INDICES[gl_VertexID];
               gl_Position = Projection * ModelView * vec4(CUBE_VERTICES[vertexIndex], 1.0);

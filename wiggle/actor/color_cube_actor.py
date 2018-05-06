@@ -30,17 +30,24 @@ class ColorCubeActor(BaseActor):
             
             layout(location = 0) uniform mat4 Projection = mat4(1);
             layout(location = 4) uniform mat4 ModelView = mat4(1);
-            layout(location = 8) uniform float Size = 0.5;
             
-            const vec3 UNIT_CUBE[8] = vec3[8](
-              vec3(-1.0, -1.0, -1.0), // 0: lower left rear
-              vec3(+1.0, -1.0, -1.0), // 1: lower right rear
-              vec3(-1.0, +1.0, -1.0), // 2: upper left rear
-              vec3(+1.0, +1.0, -1.0), // 3: upper right rear
-              vec3(-1.0, -1.0, +1.0), // 4: lower left front
-              vec3(+1.0, -1.0, +1.0), // 5: lower right front
-              vec3(-1.0, +1.0, +1.0), // 6: upper left front
-              vec3(+1.0, +1.0, +1.0)  // 7: upper right front
+            const float r = 0.5;
+            
+            const vec3 CUBE_VERTICES[8] = vec3[8](
+              vec3(-r, -r, -r), // 0: lower left rear
+              vec3(+r, -r, -r), // 1: lower right rear
+              vec3(-r, +r, -r), // 2: upper left rear
+              vec3(+r, +r, -r), // 3: upper right rear
+              vec3(-r, -r, +r), // 4: lower left front
+              vec3(+r, -r, +r), // 5: lower right front
+              vec3(-r, +r, +r), // 6: upper left front
+              vec3(+r, +r, +r)  // 7: upper right front
+            );
+            
+            const int EDGE_INDICES[24] = int[24](
+              0, 1,  1, 3,  3, 2,  2, 0,  // front
+              4, 5,  5, 7,  7, 6,  6, 4,  // rear
+              2, 6,  3, 7,  1, 5,  0, 4
             );
             
             const vec3 UNIT_CUBE_NORMALS[6] = vec3[6](
@@ -73,7 +80,7 @@ class ColorCubeActor(BaseActor):
                   _color = vec3(1.0) + _color;
               }
             
-              gl_Position = Projection * ModelView * vec4(UNIT_CUBE[vertexIndex] * Size, 1.0);
+              gl_Position = Projection * ModelView * vec4(CUBE_VERTICES[vertexIndex], 1.0);
             }
             """,
             GL.GL_VERTEX_SHADER)

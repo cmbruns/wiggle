@@ -1,24 +1,10 @@
-import numpy
-from numpy import array, asarray, dot
 import math
 
-_identity4 = (
-    (1, 0, 0, 0),
-    (0, 1, 0, 0),
-    (0, 0, 1, 0),
-    (0, 0, 0, 1))
-
-_identity3 = (
-    (1, 0, 0),
-    (0, 1, 0),
-    (0, 0, 1))
+import numpy
 
 
 class MatrixBase(object):
-    def __init__(self, matrix=_identity3):
-        super().__init__(matrix)
-
-    def __init__(self, matrix=_identity4):
+    def __init__(self, matrix=numpy.identity(4)[:]):
         self.m = numpy.array(matrix[:], dtype=numpy.float32)
 
     def __getitem__(self, item):
@@ -27,8 +13,35 @@ class MatrixBase(object):
     def __imatmul__(self, other):
         self.m @= other[:]
 
+    def __matmul__(self, rhs):
+        result = rhs @ self.m
+        return self.__class__(result[:])
+
+    def __mul__(self, rhs):
+        result = rhs * self.m
+        return self.__class__(result[:])
+
     def __len__(self):
         return len(self.m)
+
+    def __rmul__(self, lhs):
+        result = lhs * self.m
+        return self.__class__(result[:])
+
+    def pack(self, do_transpose=False):
+        if do_transpose:
+            return numpy.ascontiguousarray(self.m.T)
+        else:
+            return numpy.ascontiguousarray(self.m)
+
+    def transpose(self):
+        return self.__class__(self.m.T)
+
+
+class Matrix3f(MatrixBase):
+    @classmethod
+    def identity(cls):
+        return cls(numpy.identity(3)[:])
 
     @classmethod
     def rotation(cls, axis, radians):
@@ -42,14 +55,17 @@ class MatrixBase(object):
              (t*x*z - s*y, t*y*z + s*x, t*z*z + c))
         )
 
-
-class Matrix3f(MatrixBase):
-    def __matmul__(self, rhs):
-        return Matrix3f(self.m @ rhs)
+    @classmethod
+    def scale(cls, scale):
+        return cls(
+            ((scale, 0, 0),
+             (0, scale, 0),
+             (0, 0, scale))
+        )
 
 
 class Matrix4f(MatrixBase):
-    def __init__(self, matrix=_identity4):
+    def __init__(self, matrix=numpy.identity(4)[:]):
         super().__init__(matrix)
 
     def __matmul__(self, rhs):
@@ -60,11 +76,8 @@ class Matrix4f(MatrixBase):
             rhs = numpy.array(foo, dtype=numpy.float32)
         return Matrix4f(self.m @ rhs)
 
-    def __rmul__(self, lhs):
-        return Matrix4f(lhs * self.m)
-
     @classmethod
-    def frustum(cls, left, right, top, bottom, z_near, z_far):
+    def frustum(cls, left, right, bottom, top, z_near, z_far):
         a = (right + left) / (right - left)
         b = (top + bottom) / (top - bottom)
         c = - (z_far + z_near) / (z_far - z_near)
@@ -78,20 +91,22 @@ class Matrix4f(MatrixBase):
 
     @classmethod
     def identity(cls):
-        return cls(numpy.identity(4))
+        return cls(numpy.identity(4)[:])
 
-    def pack(self, do_transpose=False):
-        if do_transpose:
-            return numpy.ascontiguousarray(self.m.T)
-        else:
-            return numpy.ascontiguousarray(self.m)
+    @classmethod
+    def orthographic(cls, l, r, b, t, n, f):
+        return cls([
+            [2.0 / (r - l), 0, 0, -(r + l) / (r - l)],
+            [0, 2.0 / (t - b), 0, -(t + b) / (t - b)],
+            [0, 0, -2.0 / (f - n), -(f + n) / (f - n)],
+            [0, 0, 0, 1]]).transpose()
 
     @classmethod
     def perspective(cls, fov_y=math.radians(35.0), aspect=1.0, z_near=0.1, z_far=100.0):
         # Negate vertical, because screen Y is down, and OpenGL Y is up
-        fh = -z_near * math.tan(fov_y / 2.0)
-        fw = -fh * aspect
-        return cls.frustum(-fw, fw, -fh, fh, z_near, z_far)
+        top = z_near * math.tan(fov_y / 2.0)
+        right = top * aspect
+        return cls.frustum(-right, right, -top, top, z_near, z_far)
 
     @classmethod
     def rotation(cls, axis, radians):
@@ -124,13 +139,10 @@ class Matrix4f(MatrixBase):
              (x, y, z, 1),)
         )
 
-    def transpose(self):
-        return Matrix4f(self.m.T)
 
-
-class ModelMatrix(Matrix4f):
+class ModelMatrix(object):
     def __init__(self):
-        self._center = array([0, 0, 0], dtype='float32')
+        self._center = numpy.array([0, 0, 0], dtype='float32')
         self._scale = 1.0
         self._needs_update = True
         self._matrix = None
@@ -161,33 +173,3 @@ class ModelMatrix(Matrix4f):
     def scale(self, scale):
         self._needs_update = True
         self._scale = scale
-
-
-def rotation_matrix(axis, theta):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-
-    from https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
-    """
-    axis = asarray(axis)
-    axis = axis/math.sqrt(dot(axis, axis))
-    a = math.cos(theta/2.0)
-    b, c, d = -axis*math.sin(theta/2.0)
-    aa, bb, cc, dd = a*a, b*b, c*c, d*d
-    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
-    return array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
-                  [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
-                  [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
-
-
-def main():
-    v = [3, 5, 0]
-    axis = [4, 4, 1]
-    theta = 1.2
-    print(rotation_matrix(axis, theta) @ v)
-    # [ 2.74911638  4.77180932  1.91629719]
-
-
-if __name__ == '__main__':
-    main()

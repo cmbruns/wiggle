@@ -133,7 +133,7 @@ class MeshActor(BaseActor):
         super().__init__()
         self.renderer = None
         self.mesh = mesh
-        self._shader = None
+        self._shader = 0
 
     def display_gl(self, camera, *args, **kwargs):
         if self.renderer is None:
@@ -153,7 +153,7 @@ class MeshActor(BaseActor):
     def shader(self):
         if self.renderer is not None:
             return self.renderer.shader
-        return super().shader
+        return self._shader
 
     @shader.setter
     def shader(self, shader):

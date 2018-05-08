@@ -18,7 +18,22 @@ class Mesh(object):
         self.vertex_normals = []
         self.normal_for_vertex = dict()
         self.faces = []
-        self.edges = []
+        self._edges = []
+        self.edges_need_update = True
+
+    @property
+    def edges(self):
+        if self.edges_need_update:
+            self._edges.clear()
+            e = set()
+            for f in self.faces:
+                prev = f[-1]
+                for i in range(len(f)):
+                    v = f[i]
+                    e.add(tuple(sorted((v, prev))))
+                    prev = v
+            self._edges.extend(e)
+        return self._edges
 
     def glsl_name(self):
         return self.name.upper()
@@ -121,7 +136,15 @@ class CubeMesh(Mesh):
             (-r, +r, +r),  # 6: upper left near
             (+r, +r, +r),  # 7: upper right near
         ), )
-        self.edges.extend((
+        self.faces.extend((
+            (4, 5, 7, 6),  # near
+            (1, 3, 7, 5),  # right
+            (0, 4, 6, 2),  # left
+            (0, 2, 3, 1),  # far
+            (2, 6, 7, 3),  # top
+            (0, 1, 5, 4),  # bottom
+        ), )
+        self._edges.extend((
             (0, 1),  (1, 3),  (3, 2),  (2, 0),  # far
             (4, 5),  (5, 7),  (7, 6),  (6, 4),  # near
             (2, 6),  (3, 7),  (1, 5),  (0, 4),  # between

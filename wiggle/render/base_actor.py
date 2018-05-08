@@ -7,7 +7,7 @@ from wiggle.geometry.matrix import ModelMatrix
 class BaseActor(AutoInitRenderer):
     def __init__(self):
         super().__init__()
-        self.shader = 0
+        self.shader = 0  # todo: remove shader from actor, delegate to material
         self.model_matrix = ModelMatrix()
 
     def display_gl(self, camera, *args, **kwargs):

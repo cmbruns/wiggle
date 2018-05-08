@@ -1,12 +1,3 @@
-import textwrap
-
-from OpenGL import GL
-from OpenGL.GL.shaders import compileShader, compileProgram
-
-from wiggle.render.base_actor import BaseActor
-from wiggle.render.renderer import AutoInitRenderer
-
-
 class ObjParseError(Exception):
     pass
 
@@ -32,7 +23,7 @@ class Mesh(object):
                     v = f[i]
                     e.add(tuple(sorted((v, prev))))
                     prev = v
-            self._edges.extend(e)
+            self._edges.extend(sorted(e))
         return self._edges
 
     def glsl_name(self):
@@ -151,91 +142,9 @@ class CubeMesh(Mesh):
         ), )
 
 
-class MeshActor(BaseActor):
-    def __init__(self, mesh=CubeMesh()):
-        super().__init__()
-        self.renderer = None
-        self.mesh = mesh
-        self._shader = 0
-
-    def display_gl(self, camera, *args, **kwargs):
-        if self.renderer is None:
-            self.renderer = WireframeActor(self.mesh)
-            self.renderer.init_gl()
-            # self.shader = self.renderer.shader
-        super().display_gl(camera, *args, **kwargs)
-        self.renderer.display_gl(camera, *args, **kwargs)
-
-    def dispose_gl(self):
-        if self.renderer is not None:
-            self.renderer.dispose_gl()
-            self.renderer = None
-        super().dispose_gl()
-
-    @property
-    def shader(self):
-        if self.renderer is not None:
-            return self.renderer.shader
-        return self._shader
-
-    @shader.setter
-    def shader(self, shader):
-        # Unused, we delegate to the renderer
-        self._shader = shader
-
-
-def _ss(string):
-    return textwrap.dedent(string)
-
-
-class WireframeActor(AutoInitRenderer):
-    def __init__(self, mesh=CubeMesh()):
-        super().__init__()
-        self.mesh = mesh
-        self.shader = None
-
-    def fragment_shader_string(self):
-        return _ss("""
-            #version 430
-            out vec4 FragColor;
-
-            void main() {
-              FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-            }
-        """)
-
-    def init_gl(self):
-        super().init_gl()
-        self.shader = compileProgram(
-            compileShader(self.vertex_shader_string(), GL.GL_VERTEX_SHADER),
-            compileShader(self.fragment_shader_string(), GL.GL_FRAGMENT_SHADER),
-        )
-
-    def vertex_shader_string(self):
-        s = ''
-        s += _ss('#version 430\n')
-        s += _ss("""
-            layout(location = 0) uniform mat4 Projection = mat4(1);
-            layout(location = 4) uniform mat4 ModelView = mat4(1);
-        """)
-        s += _ss(self.mesh.glsl_geometry())
-        n = self.mesh.glsl_name()
-        s += _ss("""
-            void main() {
-              int vertexIndex = %s_EDGE_INDEXES[gl_VertexID];
-              gl_Position = Projection * ModelView * vec4(%s_VERTEXES[vertexIndex], 1.0);
-            }
-        """ % (n, n))
-        return s
-
-    def display_gl(self, camera, *args, **kwargs):
-        super().display_gl(camera, *args, **kwargs)
-        GL.glLineWidth(3)
-        GL.glDrawArrays(GL.GL_LINES, 0, 24)
-
-
 def main():
-    c = MeshActor()
+    from wiggle.material.wireframe import WireframeMaterial
+    c = WireframeMaterial(CubeMesh())
     print(c.vertex_shader_string())
 
 

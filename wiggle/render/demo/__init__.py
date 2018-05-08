@@ -1,5 +1,5 @@
 import wiggle
-from wiggle.geometry.mesh import MeshActor
+from wiggle.render.mesh_actor import MeshActor
 
 
 def color_cube_demo():

@@ -1,7 +1,7 @@
 from OpenGL import GL
 
-from wiggle.renderer import AutoInitRenderer
-from wiggle.matrix import ModelMatrix
+from wiggle.render.renderer import AutoInitRenderer
+from wiggle.geometry.matrix import ModelMatrix
 
 
 class BaseActor(AutoInitRenderer):

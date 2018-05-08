@@ -3,8 +3,8 @@ import textwrap
 from OpenGL import GL
 from OpenGL.GL.shaders import compileShader, compileProgram
 
-from wiggle.actor.base_actor import BaseActor
-from wiggle.renderer import AutoInitRenderer
+from wiggle.render.base_actor import BaseActor
+from wiggle.render.renderer import AutoInitRenderer
 
 
 class ObjParseError(Exception):

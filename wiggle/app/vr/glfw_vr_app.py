@@ -3,7 +3,8 @@
 import glfw
 from OpenGL import GL
 
-from vrapp import gl_renderer
+from wiggle.app.vr import gl_renderer
+import wiggle.render.demo
 
 
 class GlfwVrApp(object):
@@ -81,7 +82,7 @@ class GlfwVrApp(object):
 
 def main():
     import wiggle.demo
-    cube = wiggle.demo.wireframe_cube_demo()
+    cube = wiggle.render.demo.wireframe_cube_demo()
     renderer = wiggle.Renderer()
     renderer.add_actor(cube)
     with GlfwVrApp(actors=[renderer, ]) as app:

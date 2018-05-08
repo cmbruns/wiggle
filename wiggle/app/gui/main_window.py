@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import QSettings
 
 import wiggle
-import glcube
+from .scene_canvas import SceneCanvas
 
 
 class MainWindow(QMainWindow):
@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
 
     def _change_multisampling(self, sample_count):
         """Creates a new instance of SceneViewer, to support interactive changing of multisampling parameters"""
-        new_canvas = glcube.scene_canvas.SceneCanvas(self.sceneContainer, samples=sample_count)
+        new_canvas = SceneCanvas(self.sceneContainer, samples=sample_count)
         old_canvas = self.openGLWidget
         self.sceneContainer.layout().removeWidget(old_canvas)
         old_canvas.setParent(None)
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         QCoreApplication.quit()
 
     def _setup_ui(self):
-        uic.loadUi(uifile=pkg_resources.resource_stream('glcube', 'glcube.ui'), baseinstance=self)
+        uic.loadUi(uifile=pkg_resources.resource_stream('wiggle.app.gui', 'glcube.ui'), baseinstance=self)
         self.openGLWidget.main_window = self
         self.actionQuit.triggered.connect(self._quit)
         self.actionMultisample.toggled.connect(self.toggle_multisampling)

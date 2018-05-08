@@ -3,8 +3,8 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtCore
 
-from glcube.main_window import MainWindow
-import wiggle.demo
+from wiggle.app.gui.main_window import MainWindow
+import wiggle.render.demo
 
 # For some reason this block causes python exceptions raised during
 # rendering to crash with stack traces like I expect.
@@ -26,9 +26,9 @@ class GlCubeApplication(QApplication):
 
     def load_test_scene(self):
         if False:
-            cube = wiggle.demo.color_cube_demo()
+            cube = wiggle.render.demo.color_cube_demo()
         else:
-            cube = wiggle.demo.wireframe_cube_demo()
+            cube = wiggle.render.demo.wireframe_cube_demo()
         self.main_window.renderer.add_actor(cube)
 
     def run(self):

@@ -1,10 +1,16 @@
+# file color_cube_actor.py
+
+"""
+Color cube for use in "hello world" 3D apps
+"""
+
 from OpenGL import GL
 from OpenGL.GL.shaders import compileShader, compileProgram
 
-from wiggle.actor.base_actor import BaseActor
+from wiggle.render.base_actor import BaseActor
 
 
-class WireframeCubeActor(BaseActor):
+class ColorCubeActor(BaseActor):
     """
     Draws a cube
     
@@ -16,7 +22,7 @@ class WireframeCubeActor(BaseActor):
       |/______|/
       4       5
     """
-    
+
     def init_gl(self):
         vertex_shader = compileShader(
             """#version 430
@@ -62,18 +68,29 @@ class WireframeCubeActor(BaseActor):
               0, 1, 4, 4, 1, 5  // bottom
             );
             
+            out vec3 _color;
+            
             void main() {
-              int vertexIndex = EDGE_INDICES[gl_VertexID];
+              _color = vec3(1.0, 0.0, 0.0);
+              int vertexIndex = CUBE_INDICES[gl_VertexID];
+              int normalIndex = gl_VertexID / 6;
+              
+              _color = UNIT_CUBE_NORMALS[normalIndex];
+              if (any(lessThan(_color, vec3(0.0)))) {
+                  _color = vec3(1.0) + _color;
+              }
+            
               gl_Position = Projection * ModelView * vec4(CUBE_VERTICES[vertexIndex], 1.0);
             }
             """,
             GL.GL_VERTEX_SHADER)
         fragment_shader = compileShader(
             """#version 430
+            in vec3 _color;
             out vec4 FragColor;
             
             void main() {
-              FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+              FragColor = vec4(_color, 1.0);
             }
             """,
             GL.GL_FRAGMENT_SHADER)
@@ -81,5 +98,4 @@ class WireframeCubeActor(BaseActor):
         
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glLineWidth(3)
-        GL.glDrawArrays(GL.GL_LINES, 0, 24)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 36)

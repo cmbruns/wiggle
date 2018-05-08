@@ -308,7 +308,7 @@
   <customwidget>
    <class>SceneCanvas</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">glcube/scene_canvas</header>
+   <header location="global">wiggle/app/gui/scene_canvas</header>
   </customwidget>
  </customwidgets>
  <resources/>

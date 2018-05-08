@@ -1,6 +1,6 @@
 from OpenGL import GL
 
-from .base import AbstractRenderable, AutoInitRenderer, ParentRenderer, VaoRenderer
+from wiggle.render.base import AbstractRenderable, AutoInitRenderer, ParentRenderer, VaoRenderer
 
 
 class ScreenClearer(AbstractRenderable):

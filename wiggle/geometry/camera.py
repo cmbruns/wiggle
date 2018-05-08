@@ -2,7 +2,7 @@ import math
 
 import numpy
 
-from .matrix import Matrix4f, Matrix3f
+from wiggle.geometry.matrix import Matrix4f
 
 
 class PerspectiveCamera(object):

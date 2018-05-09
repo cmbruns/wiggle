@@ -1,4 +1,5 @@
 import textwrap
+import pkg_resources
 
 from OpenGL import GL
 from OpenGL.GL.shaders import compileProgram, compileShader

@@ -4,17 +4,17 @@ from wiggle.material.wireframe import WireframeMaterial
 
 
 class MeshActor(BaseActor):
-    def __init__(self, mesh=CubeMesh()):
+    def __init__(self, mesh=CubeMesh(), material=WireframeMaterial()):
         super().__init__()
-        self.material = None
+        self.material = material
         self.mesh = mesh
         self._shader = 0  # todo: delegate shader storage completely to material
 
+    def init_gl(self):
+        super().init_gl()
+        self.material.init_gl()
+
     def display_gl(self, camera, *args, **kwargs):
-        if self.material is None:
-            self.material = WireframeMaterial(self.mesh)
-            self.material.init_gl()
-            # self.shader = self.material.shader
         super().display_gl(camera, *args, **kwargs)
         self.material.display_gl(camera, *args, **kwargs)
 

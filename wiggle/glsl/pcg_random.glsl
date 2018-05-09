@@ -82,15 +82,15 @@ Pcg32State pcg_srandom(in uint seed)
     return rng;
 }
 
-// Returns the next random value (in the range 0-65535 (16-bit))
-// and advances the random number generator
+// Return the next random value (in the range 0-65535 (16-bit))
+// and advance the random number generator
 uint pcg_random(inout Pcg32State rng) {
     uint oldstate = rng.state;
     _pcg_step(rng);
     return _pcg_output_xsh_rr_32_16(oldstate);
 }
 
-// Efficiently skips the random generator ahead a certain amount.
+// Efficiently skip the random generator ahead a certain amount.
 // Useful for simulating linear random generation along textures
 // or screens in a fragment shader.
 void pcg_discard(inout Pcg32State rng, in uint delta) {

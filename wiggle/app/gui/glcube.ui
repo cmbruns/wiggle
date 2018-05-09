@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>697</width>
-    <height>544</height>
+    <width>573</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -101,10 +101,41 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QCheckBox" name="wireFrameCheckBox">
-             <property name="text">
-              <string>Wireframe</string>
+            <widget class="QComboBox" name="wireframe_comboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::AdjustToContents</enum>
+             </property>
+             <item>
+              <property name="text">
+               <string>Wireframe Off</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>PolygonMode</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>GL_LINES</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Rectangles</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Barycentric</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>
@@ -113,12 +144,12 @@
               <string>Line Width</string>
              </property>
              <property name="buddy">
-              <cstring>doubleSpinBox</cstring>
+              <cstring>lineWidth_doubleSpinBox</cstring>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="lineWidth_doubleSpinBox">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -133,39 +164,6 @@
              </property>
              <property name="value">
               <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="wfGlLines_radioButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>GL_LINES</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="wfRectangles_radioButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Rectangles</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="wfBaryscentric_radioButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Barycentric</string>
              </property>
             </widget>
            </item>
@@ -196,7 +194,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>697</width>
+     <width>573</width>
      <height>21</height>
     </rect>
    </property>
@@ -320,8 +318,8 @@
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>624</x>
-     <y>92</y>
+     <x>540</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
@@ -336,60 +334,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>609</x>
-     <y>90</y>
+     <x>540</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>617</x>
-     <y>116</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>wireFrameCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>doubleSpinBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>635</x>
-     <y>176</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>633</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>wireFrameCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>actionWireframe</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>623</x>
-     <y>174</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>wireFrameCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>wfGlLines_radioButton</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>623</x>
-     <y>174</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>623</x>
-     <y>242</y>
+     <x>540</x>
+     <y>126</y>
     </hint>
    </hints>
   </connection>

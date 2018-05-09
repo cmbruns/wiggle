@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self.actionMultisample.toggled.connect(self.toggle_multisampling)
         self.sampleCountSpinBox.valueChanged.connect(self.set_multisample_count)
         self.actionWireframe.toggled.connect(self.toggle_wireframe)
+        self.wireframe_comboBox.activated.connect(self.set_wireframe_mode)
         self.read_settings()
 
     def _setup_canvas(self):
@@ -70,6 +71,9 @@ class MainWindow(QMainWindow):
         if self.b_multisample:
             self._change_multisampling(sample_count)
 
+    def set_wireframe_mode(self, mode):
+        self.toggle_wireframe(mode != 0)
+
     def toggle_multisampling(self, checked):
         self.b_multisample = checked
         if checked:
@@ -78,4 +82,5 @@ class MainWindow(QMainWindow):
             self._change_multisampling(0)
 
     def toggle_wireframe(self, checked):
+        self.lineWidth_doubleSpinBox.setEnabled(checked)
         print('wireframe', checked)

@@ -26,9 +26,6 @@ class Mesh(object):
             self._edges.extend(sorted(e))
         return self._edges
 
-    def glsl_name(self):
-        return self.name.upper()
-
     def _parse_obj_line(self, line):
         if line.startswith('#'):
             # e.g. "# Blender v2.65 (sub 0) OBJ File"
@@ -66,10 +63,9 @@ class Mesh(object):
         if vc < 1:
             return ''
         lines = []
-        name = self.glsl_name()
         if vc > 0:
             # e.g. 'const vec3 CUBE_VERTEXES[8] = vec3[8]('
-            lines.append(f'\nconst vec3 {name}_VERTEXES[{vc}] = vec3[{vc}](')
+            lines.append(f'\nconst vec3 VERTEXES[{vc}] = vec3[{vc}](')
             comma = ','
             for i in range(vc):
                 v = self.vertexes[i]
@@ -85,10 +81,9 @@ class Mesh(object):
         if ec < 1:
             return ''
         lines = []
-        name = self.glsl_name()
         if ec > 0:
             # e.g. 'const int EDGE_INDEXES[24] = int[24]('
-            lines.append(f'\nconst int {name}_EDGE_INDEXES[{2*ec}] = int[{2*ec}](')
+            lines.append(f'\nconst int EDGE_INDEXES[{2*ec}] = int[{2*ec}](')
             comma = ','
             for i in range(ec):
                 e = self.edges[i]

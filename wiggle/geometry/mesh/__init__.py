@@ -9,6 +9,7 @@ class Mesh(object):
         self.vertex_normals = []
         self.normal_for_vertex = dict()
         self.faces = []
+        self.triangle_strips = []
         self._edges = []
         self.edges_need_update = True
 
@@ -130,11 +131,13 @@ class CubeMesh(Mesh):
             (2, 6, 7, 3),  # top
             (0, 1, 5, 4),  # bottom
         ), )
-        self._edges.extend((
-            (0, 1),  (1, 3),  (3, 2),  (2, 0),  # far
-            (4, 5),  (5, 7),  (7, 6),  (6, 4),  # near
-            (2, 6),  (3, 7),  (1, 5),  (0, 4),  # between
-        ), )
+        self.triangle_strips.extend(
+            (
+                (
+                    2, 6, 3, 7, 5, 6, 4, 2, 0, 3, 1, 5, 0, 4
+                ),
+            ),
+        )
 
 
 def main():

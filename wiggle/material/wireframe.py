@@ -18,6 +18,7 @@ class WireframeMaterial(AutoInitRenderer):
         super().__init__()
         if static_mesh is not None:
             self._static_mesh_string = _ss(static_mesh.glsl_geometry())
+            self._edge_count = len(static_mesh.edges)
         else:
             self._static_mesh_string = None
         self.shader = None

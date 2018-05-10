@@ -1,6 +1,6 @@
-# line 2
 // Based on C code from
 // https://github.com/imneme/pcg-c/blob/master/include/pcg_variants.h
+// Uses 32-bit state, and 16-bit value precision
 
 /*
  * PCG Random Number Generation for C.

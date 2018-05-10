@@ -33,6 +33,5 @@ void main()
 {
   int vertexIndex = EDGE_INDEXES[gl_VertexID];
   vec3 position = VERTEXES[vertexIndex];
-
   gl_Position = Projection * ModelView * vec4(position, 1.0);
 }

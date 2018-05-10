@@ -26,9 +26,33 @@ class FullShaderFromFile(object):
         self.file_name = pkg_resources.resource_filename(package, file_name)
         print(self.file_name)
 
+    def _format_warnings(self, log):
+        log = log.replace(r'\n', '\n')
+        log = log.replace(r"\'", "'")
+        lines = list()
+        for line in log.split('\n'):
+            line = line.strip()
+            if len(line) < 1:
+                continue
+            lines.append(f'    {line}')
+            match = re.match(r'(\d+)\((\d+)\) : .*', line)
+            if match:
+                line_number = match.group(2)
+                file_index = match.group(1)
+                lines.append(f'  File "{self.file_name}", line {line_number}, in GLSL shader program')
+        if len(lines) < 1:
+            return ''
+        return '\n'.join(lines)
+
     def compile(self):
         try:
             result = compileShader(self._string, self.shader_type)
+            doWarn = True
+            if doWarn:
+                log = GL.glGetShaderInfoLog(result)
+                if len(log) > 0:
+                    print(self._format_warnings(log.decode()))
+            return result
         except RuntimeError as error:
             ei = sys.exc_info()
             msg = ei[1]
@@ -37,23 +61,9 @@ class FullShaderFromFile(object):
             new_message = list()
             m = re.match(r'^(Shader compile failure \(\d+\):) b\'(.*)\'', error_message)
             if m:
-                new_message.append(f' {m.group(1)}')
-                for item in m.group(2).split(r'\n'):
-                    # 0(34) : warning C7022: unrecognized profile specifier "bork"
-                    # Poorly escaped quotes here:
-                    # 0(34) : error C0000: syntax error, unexpected identifier, expecting \',\' or \';\' at token "vertexIndex"
-                    item = item.replace(r"\'", "'")
-                    item = item.strip()
-                    if len(item) < 1:
-                        continue
-                    new_message.append(f'    {item}')
-                    m2 = re.match(r'(\d+)\((\d+)\) : .*', item)
-                    if m2:
-                        line = m2.group(2)
-                        file_index = m2.group(1)
-                        new_message.append(f'  File "{self.file_name}", line {line}, in GLSL shader program')
+                new_message.append(f' {m.group(1)}')  # Shader compile failure (0):
+                new_message.append(self._format_warnings(m.group(2)))
             raise SyntaxError('\n'.join(new_message)) from error
-        return result
 
 
 def _ss(string):
@@ -72,30 +82,17 @@ class WireframeMaterial(AutoInitRenderer):
         self.shader = None
 
     def fragment_shader_string(self):
-        return _ss("""
-            #version 430
-            out vec4 FragColor;
-
-            void main() {
-              FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-            }
-        """)
+        return FullShaderFromFile(GL.GL_FRAGMENT_SHADER, 'wiggle.glsl', 'white_color.frag')
 
     def init_gl(self):
         super().init_gl()
         self.shader = compileProgram(
             self.vertex_shader_string().compile(),
-            compileShader(self.fragment_shader_string(), GL.GL_FRAGMENT_SHADER),
+            self.fragment_shader_string().compile(),
         )
 
     def vertex_shader_string(self):
         return FullShaderFromFile(GL.GL_VERTEX_SHADER, 'wiggle.glsl', 'wireframe_cube.vert')
-        s = ''
-        line_index = 0
-        for line in pkg_resources.resource_stream('wiggle.glsl', 'wireframe_cube.vert'):
-            line_index += 1
-            s += line.decode()
-        return s
 
     def vertex_shader_string0(self):
         s = ''

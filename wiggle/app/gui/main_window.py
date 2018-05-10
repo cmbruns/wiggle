@@ -13,6 +13,8 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
         self._setup_ui()
+        self.read_settings()
+        self.clear_settings()
         self.camera = wiggle.PerspectiveCamera()
         self.camera.focus = (0, 1.2, 0)
         self.camera.distance = 2
@@ -46,7 +48,6 @@ class MainWindow(QMainWindow):
         self.sampleCountSpinBox.valueChanged.connect(self.set_multisample_count)
         self.actionWireframe.toggled.connect(self.toggle_wireframe)
         self.wireframe_comboBox.activated.connect(self.set_wireframe_mode)
-        self.read_settings()
 
     def _setup_canvas(self):
         self.openGLWidget.camera = self.camera
@@ -56,10 +57,17 @@ class MainWindow(QMainWindow):
         self.save_settings()
         super().closeEvent(event)
 
+    def clear_settings(self):
+        settings = QSettings('Brunsgen International', 'glcube')
+        settings.setValue('geometry', None)
+        settings.setValue('windowState', None)
+
     def read_settings(self):
         settings = QSettings('Brunsgen International', 'glcube')
-        self.restoreGeometry(settings.value('geometry'))
-        self.restoreState(settings.value('windowState'))
+        geo = settings.value('geometry')
+        if geo:
+            self.restoreGeometry(geo)
+            self.restoreState(settings.value('windowState'))
 
     def save_settings(self):
         settings = QSettings('Brunsgen International', 'glcube')

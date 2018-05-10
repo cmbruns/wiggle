@@ -29,7 +29,8 @@ const int EDGE_INDEXES[24] = int[24](
   6, 7
 );
 
-void main() {
+void main()
+{
   int vertexIndex = EDGE_INDEXES[gl_VertexID];
   vec3 position = VERTEXES[vertexIndex];
 

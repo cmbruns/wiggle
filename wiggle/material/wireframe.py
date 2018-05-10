@@ -13,7 +13,7 @@ from wiggle.geometry.mesh import CubeMesh
 
 
 # todo: separate classes for string-from-one-file vs. final string with version and #line entries etc.
-class ShaderString(object):
+class FullShaderFromFile(object):
     def __init__(self, shader_type, package, file_name, ):
         super().__init__()
         self.shader_type = shader_type
@@ -34,29 +34,25 @@ class ShaderString(object):
             msg = ei[1]
             # Shader compile failure (0): b'0(34) : warning C7022: unrecognized profile specifier "bork"\n0(34) : error C7558: OpenGL does not allow profile specifiers on declarations\n'
             error_message = msg.args[0]
-            new_message = '\n'
-            m = re.match(r'^Shader compile failure \(\d+\): b\'(.*)\'', error_message)
+            new_message = list()
+            m = re.match(r'^(Shader compile failure \(\d+\):) b\'(.*)\'', error_message)
             if m:
-                # print(m)
-                for item in m.group(1).split(r'\n'):
+                new_message.append(f' {m.group(1)}')
+                for item in m.group(2).split(r'\n'):
                     # 0(34) : warning C7022: unrecognized profile specifier "bork"
                     # Poorly escaped quotes here:
                     # 0(34) : error C0000: syntax error, unexpected identifier, expecting \',\' or \';\' at token "vertexIndex"
                     item = item.replace(r"\'", "'")
-                    new_message += f'    {item}\n'
+                    item = item.strip()
+                    if len(item) < 1:
+                        continue
+                    new_message.append(f'    {item}')
                     m2 = re.match(r'(\d+)\((\d+)\) : .*', item)
-
                     if m2:
                         line = m2.group(2)
                         file_index = m2.group(1)
-                        new_message += f'  File "{self.file_name}", line {line}, in GLSL shader program\n'
-                        # print(rf'  File "{self.file_name}", line {line}, in GLSL shader program')
-                # print(m.group(1))
-            #
-            shader_string = msg.args[1][0].decode()
-            # print(error_message)
-            # print(shader_string)
-            raise SyntaxError(new_message) from error
+                        new_message.append(f'  File "{self.file_name}", line {line}, in GLSL shader program')
+            raise SyntaxError('\n'.join(new_message)) from error
         return result
 
 
@@ -93,7 +89,7 @@ class WireframeMaterial(AutoInitRenderer):
         )
 
     def vertex_shader_string(self):
-        return ShaderString(GL.GL_VERTEX_SHADER, 'wiggle.glsl', 'wireframe_cube.vert')
+        return FullShaderFromFile(GL.GL_VERTEX_SHADER, 'wiggle.glsl', 'wireframe_cube.vert')
         s = ''
         line_index = 0
         for line in pkg_resources.resource_stream('wiggle.glsl', 'wireframe_cube.vert'):

@@ -167,15 +167,12 @@ class WireframeMaterial(AutoInitRenderer):
             self._static_mesh_string = None
         self.shader = None
 
-    def fragment_shader(self):
-        return ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER)
-
     def init_gl(self):
         super().init_gl()
-        self.shader = int(ShaderProgram([self.fragment_shader(), self.vertex_shader()]))
-
-    def vertex_shader(self):
-        return ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ],  GL.GL_VERTEX_SHADER)
+        self.shader = int(ShaderProgram([
+            ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER),
+            ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ], GL.GL_VERTEX_SHADER),
+        ]))
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)

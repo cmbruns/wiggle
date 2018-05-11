@@ -14,17 +14,43 @@ def _ss(string):
     return textwrap.dedent(string)
 
 
+class ShaderProgram(object):
+    def __init__(self, stages):
+        self.stages = stages
+        self.handle = None
+
+    def __int__(self):
+        if not self.handle:
+            self.compile()
+        return self.handle
+
+    def compile(self):
+        self.handle = compileProgram(*[s.compile() for s in self.stages])
+        return self.handle
+
+
 class ShaderStage(object):
     def __init__(self, blocks, stage=GL.GL_FRAGMENT_SHADER):
         super().__init__()
         self.blocks = blocks
         self.gl_stage = stage
         self._index_blocks()
+        self.handle = None
+
+    def __int__(self):
+        if not self.handle:
+            self.handle = self.compile()
+        return self.handle
 
     def __str__(self):
         result = []
+        line_index = 0
         for b in self.blocks:
-            result.append(str(b))
+            b.load()
+            for line in b.lines:
+                line.shader_line_index = line_index
+                result.append(str(line))
+                line_index += 1
         return '\n'.join(result)
 
     def _index_blocks(self):
@@ -98,6 +124,7 @@ class ShaderFileBlock(object):
     def __init__(self, package, file_name):
         self.info = ShaderBlockInfo(package, file_name)
         self.lines = []
+        self.is_loaded = False
 
     def __str__(self):
         result = []
@@ -107,16 +134,20 @@ class ShaderFileBlock(object):
         return '\n'.join(result)
 
     def load(self):
+        if self.is_loaded:
+            return
         self.lines.clear()
         line_index = 0
         for line in pkg_resources.resource_stream(self.info.package, self.info.file_name):
-            line_index += 1
             self.lines.append(ShaderLine(line=line.decode(), block_info=self.info, block_line_index=line_index))
+            line_index += 1
+        self.info.line_count = len(self.lines)
+        self.is_loaded = True
 
 
 class ShaderLine(object):
     def __init__(self, line, block_info, block_line_index, shader_line_index=None):
-        self.string = line
+        self.string = str(line).rstrip()
         self.block_info = block_info
         self.block_line_index = block_line_index
         self.shader_line_index = shader_line_index
@@ -136,17 +167,14 @@ class WireframeMaterial(AutoInitRenderer):
             self._static_mesh_string = None
         self.shader = None
 
-    def fragment_shader_string(self):
+    def fragment_shader(self):
         return ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER)
 
     def init_gl(self):
         super().init_gl()
-        self.shader = compileProgram(
-            self.vertex_shader_string().compile(),
-            self.fragment_shader_string().compile(),
-        )
+        self.shader = int(ShaderProgram([self.fragment_shader(), self.vertex_shader()]))
 
-    def vertex_shader_string(self):
+    def vertex_shader(self):
         return ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ],  GL.GL_VERTEX_SHADER)
 
     def display_gl(self, camera, *args, **kwargs):
@@ -157,7 +185,7 @@ class WireframeMaterial(AutoInitRenderer):
 
 def main():
     c = WireframeMaterial(CubeMesh())
-    print(c.vertex_shader_string())
+    print(c.vertex_shader())
 
 
 if __name__ == '__main__':

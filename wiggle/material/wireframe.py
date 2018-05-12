@@ -145,7 +145,6 @@ class CompositeShaderStage(BaseShaderStage):
             template_line_index += 1
             # todo #line comments
         result = '\n'.join(result)
-        # print(result, file=sys.stderr)
         return result
 
     def _append_blocks(self, blocks, out_lines, line_index, indent=''):
@@ -223,21 +222,18 @@ class WireframeMaterial(AutoInitRenderer):
 
     def init_gl(self):
         super().init_gl()
-        if True:
-            vert = CompositeShaderStage(
-                    declarations=[
-                        ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
-                        ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
-                    ],
-                    executions=[
-                        ShaderFileBlock('wiggle.glsl', 'static_cube_edge_exec.vert'),
-                        ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert'),
-                    ],
-                    stage=GL.GL_VERTEX_SHADER)
-        else:
-            vert = ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ], GL.GL_VERTEX_SHADER)
+        vertex_shader = CompositeShaderStage(
+                declarations=[
+                    ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
+                    ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
+                ],
+                executions=[
+                    ShaderFileBlock('wiggle.glsl', 'static_cube_edge_exec.vert'),
+                    ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert'),
+                ],
+                stage=GL.GL_VERTEX_SHADER)
         self.shader = int(ShaderProgram([
-            vert,
+            vertex_shader,
             ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER),
         ]))
 

@@ -131,14 +131,19 @@ class CompositeShaderStage(BaseShaderStage):
         template_block = ShaderFileBlock('wiggle.glsl', 'shader_template.glsl')
         self._index_one_block(template_block)
         template_block.load()
+        file_index = self.index_for_block_file_name[template_block.info.full_file_name()]
         for line in template_block.lines:
             sl = str(line)
             m_decl = re.match(r'\s*#pragma insert_declarations', sl)
             m_exec = re.match(r'\s*#pragma insert_procedural_code', sl)
             if m_decl:
                 line_index = self._append_blocks(self.declarations, result, line_index)
+                result.append(f'#line {template_line_index+1} {file_index}')
+                line_index += 1
             elif m_exec:
                 line_index = self._append_blocks(self.executions, result, line_index, indent='    ')
+                result.append(f'#line {template_line_index+1} {file_index}')
+                line_index += 1
             else:
                 result.append(str(line))
                 line_index + 1

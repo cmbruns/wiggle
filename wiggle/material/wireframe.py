@@ -29,13 +29,14 @@ class ShaderProgram(object):
         return self.handle
 
 
-class ShaderStage(object):
-    def __init__(self, blocks, stage=GL.GL_FRAGMENT_SHADER):
+class BaseShaderStage(object):
+    def __init__(self, stage=GL.GL_FRAGMENT_SHADER):
         super().__init__()
-        self.blocks = blocks
         self.gl_stage = stage
-        self._index_blocks()
         self.handle = None
+        self._next_block_index = 0
+        self.file_name_for_block_index = dict()
+        self.index_for_block_file_name = dict()
 
     def __int__(self):
         if not self.handle:
@@ -53,17 +54,17 @@ class ShaderStage(object):
                 line_index += 1
         return '\n'.join(result)
 
+    def _index_one_block(self, block):
+        file_name = block.info.full_file_name()
+        if file_name not in self.index_for_block_file_name:
+            index = self._next_block_index
+            self._next_block_index += 1
+            self.file_name_for_block_index[index] = file_name
+            self.index_for_block_file_name[file_name] = index
+
     def _index_blocks(self):
-        self._next_block_index = 0
-        self.file_name_for_block_index = dict()
-        self.index_for_block_file_name = dict()
-        for b in self.blocks:
-            file_name = b.info.full_file_name()
-            if file_name not in self.index_for_block_file_name:
-                index = self._next_block_index
-                self._next_block_index += 1
-                self.file_name_for_block_index[index] = file_name
-                self.index_for_block_file_name[file_name] = index
+        for block in self.blocks:
+            self._index_one_block(block)
 
     def _format_warnings(self, log):
         log = log.replace(r'\n', '\n')
@@ -108,6 +109,59 @@ class ShaderStage(object):
                 raise SyntaxError('\n'.join(new_message)) from error
             else:
                 raise
+
+
+class ShaderStage(BaseShaderStage):
+    def __init__(self, blocks, stage=GL.GL_FRAGMENT_SHADER):
+        super().__init__(stage=stage)
+        self.blocks = blocks
+        self._index_blocks()
+
+
+class CompositeShaderStage(BaseShaderStage):
+    def __init__(self, declarations, executions, stage=GL.GL_FRAGMENT_SHADER):
+        super().__init__(stage=stage)
+        self.declarations = declarations
+        self.executions = executions
+
+    def __str__(self):
+        result = []
+        line_index = 0  # line number for final full shader
+        template_line_index = 0  # line number for template skeleton shader file
+        template_block = ShaderFileBlock('wiggle.glsl', 'shader_template.glsl')
+        self._index_one_block(template_block)
+        template_block.load()
+        for line in template_block.lines:
+            sl = str(line)
+            m_decl = re.match(r'\s*#pragma insert_declarations', sl)
+            m_exec = re.match(r'\s*#pragma insert_procedural_code', sl)
+            if m_decl:
+                line_index = self._append_blocks(self.declarations, result, line_index)
+            elif m_exec:
+                line_index = self._append_blocks(self.executions, result, line_index, indent='    ')
+            else:
+                result.append(str(line))
+                line_index + 1
+            template_line_index += 1
+            # todo #line comments
+        result = '\n'.join(result)
+        # print(result, file=sys.stderr)
+        return result
+
+    def _append_blocks(self, blocks, out_lines, line_index, indent=''):
+        for block in blocks:
+            self._index_one_block(block)
+            block_line_index = 0
+            block.load()
+            file_index = self.index_for_block_file_name[block.info.full_file_name()]
+            out_lines.append(f'{indent}#line {block_line_index+1} {file_index}')
+            line_index += 1
+            for block_line in block.lines:
+                block_line.shader_line_index = line_index
+                out_lines.append(str(block_line))
+                line_index += 1
+                block_line_index += 1
+        return line_index
 
 
 class ShaderBlockInfo(object):
@@ -169,9 +223,22 @@ class WireframeMaterial(AutoInitRenderer):
 
     def init_gl(self):
         super().init_gl()
+        if True:
+            vert = CompositeShaderStage(
+                    declarations=[
+                        ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
+                        ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
+                    ],
+                    executions=[
+                        ShaderFileBlock('wiggle.glsl', 'static_cube_edge_exec.vert'),
+                        ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert'),
+                    ],
+                    stage=GL.GL_VERTEX_SHADER)
+        else:
+            vert = ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ], GL.GL_VERTEX_SHADER)
         self.shader = int(ShaderProgram([
+            vert,
             ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER),
-            ShaderStage([ShaderFileBlock('wiggle.glsl', 'wireframe_cube.vert'), ], GL.GL_VERTEX_SHADER),
         ]))
 
     def display_gl(self, camera, *args, **kwargs):

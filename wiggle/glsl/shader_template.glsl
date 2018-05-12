@@ -1,10 +1,8 @@
 #version 430
 
-// insert declarations here
-//@DECLARATIONS@
+#pragma insert_declarations
 
 void main()
 {
-    // insert procedural code here
-    //@EXECUTIONS@
+    #pragma insert_procedural_code
 }

@@ -11,6 +11,7 @@ class MeshActor(BaseActor):
         self.material = material
         self.mesh = mesh
         self._shader = 0  # todo: delegate shader storage completely to material
+        self.primitive = material.primitive()
 
     def init_gl(self):
         super().init_gl()

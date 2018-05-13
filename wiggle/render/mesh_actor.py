@@ -1,3 +1,5 @@
+from OpenGL import GL
+
 from wiggle.geometry.mesh import CubeMesh
 from wiggle.render.base_actor import BaseActor
 from wiggle.material.wireframe import WireframeMaterial
@@ -17,6 +19,7 @@ class MeshActor(BaseActor):
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
         self.material.display_gl(camera, *args, **kwargs)
+        GL.glDrawArrays(GL.GL_LINES, 0, 24)
 
     def dispose_gl(self):
         if self.material is not None:

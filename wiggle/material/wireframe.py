@@ -250,7 +250,6 @@ class WireframeMaterial(AutoInitRenderer):
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
         GL.glLineWidth(3)
-        GL.glDrawArrays(GL.GL_LINES, 0, 24)
 
 
 def main():

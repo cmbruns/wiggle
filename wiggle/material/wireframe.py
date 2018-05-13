@@ -43,17 +43,6 @@ class BaseShaderStage(object):
             self.handle = self.compile()
         return self.handle
 
-    def __str__(self):
-        result = []
-        line_index = 0
-        for b in self.blocks:
-            b.load()
-            for line in b.lines:
-                line.shader_line_index = line_index
-                result.append(str(line))
-                line_index += 1
-        return '\n'.join(result)
-
     def _index_one_block(self, block):
         file_name = block.info.full_file_name()
         if file_name not in self.index_for_block_file_name:
@@ -61,10 +50,6 @@ class BaseShaderStage(object):
             self._next_block_index += 1
             self.file_name_for_block_index[index] = file_name
             self.index_for_block_file_name[file_name] = index
-
-    def _index_blocks(self):
-        for block in self.blocks:
-            self._index_one_block(block)
 
     def _format_warnings(self, log):
         log = log.replace(r'\n', '\n')
@@ -116,6 +101,21 @@ class ShaderStage(BaseShaderStage):
         super().__init__(stage=stage)
         self.blocks = blocks
         self._index_blocks()
+
+    def __str__(self):
+        result = []
+        line_index = 0
+        for b in self.blocks:
+            b.load()
+            for line in b.lines:
+                line.shader_line_index = line_index
+                result.append(str(line))
+                line_index += 1
+        return '\n'.join(result)
+
+    def _index_blocks(self):
+        for block in self.blocks:
+            self._index_one_block(block)
 
 
 class CompositeShaderStage(BaseShaderStage):
@@ -224,10 +224,12 @@ class WireframeMaterial(AutoInitRenderer):
         else:
             self._static_mesh_string = None
         self.shader = None
+        self.vertex_shader = None
+        self.fragment_shader = None
 
     def init_gl(self):
         super().init_gl()
-        vertex_shader = CompositeShaderStage(
+        self.vertex_shader = CompositeShaderStage(
                 declarations=[
                     ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
                     ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
@@ -237,9 +239,12 @@ class WireframeMaterial(AutoInitRenderer):
                     ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert'),
                 ],
                 stage=GL.GL_VERTEX_SHADER)
+        self.fragment_shader = ShaderStage(
+            [ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ],
+            GL.GL_FRAGMENT_SHADER)
         self.shader = int(ShaderProgram([
-            vertex_shader,
-            ShaderStage([ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ], GL.GL_FRAGMENT_SHADER),
+            self.vertex_shader,
+            self.fragment_shader,
         ]))
 
     def display_gl(self, camera, *args, **kwargs):

@@ -7,7 +7,6 @@ from wiggle.geometry.matrix import ModelMatrix
 class BaseActor(AutoInitRenderer):
     def __init__(self):
         super().__init__()
-        self.shader = 0  # todo: remove shader from actor, delegate to material
         self.model_matrix = ModelMatrix()
 
     def display_gl(self, camera, *args, **kwargs):
@@ -18,8 +17,6 @@ class BaseActor(AutoInitRenderer):
         GL.glUniformMatrix4fv(4, 1, False, model_view.pack())
 
     def dispose_gl(self):
-        GL.glDeleteProgram(self.shader)
-        self.shader = 0
         super().dispose_gl()
 
     @property

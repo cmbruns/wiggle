@@ -13,7 +13,8 @@ def color_cube_demo():
 
 def wireframe_cube_demo():
     cube = CubeMesh()
-    actor = MeshActor(mesh=cube, material=WireframeMaterial(static_mesh=cube))
+    # actor = MeshActor(mesh=cube, material=WireframeMaterial(static_mesh=cube))
+    actor = MeshActor(mesh=cube, material=WireframeMaterial())
     actor.model_center = (0, 1.2, 0)
     actor.scale = 0.3
     return actor

@@ -25,6 +25,9 @@ class BaseMaterial(AutoInitRenderer):
     def create_geometry_shader(self):
         return None
 
+    def has_static_mesh(self):
+        return self._static_mesh_string is not None
+
     def init_gl(self):
         super().init_gl()
         stages = []
@@ -43,18 +46,22 @@ class WireframeMaterial(BaseMaterial):
             [ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ],
             GL.GL_FRAGMENT_SHADER)
 
-    @staticmethod
-    def create_vertex_shader():
-        return CompositeShaderStage(
-            declarations=[
-                ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
-                ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
-            ],
-            executions=[
-                ShaderFileBlock('wiggle.glsl', 'static_cube_edge_exec.vert'),
-                ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert2'),
-            ],
-            stage=GL.GL_VERTEX_SHADER)
+    def create_vertex_shader(self):
+        if self.has_static_mesh():
+            return CompositeShaderStage(
+                declarations=[
+                    ShaderFileBlock('wiggle.glsl', 'model_and_view_decl.vert'),
+                    ShaderFileBlock('wiggle.glsl', 'static_cube_decl.vert'),
+                ],
+                executions=[
+                    ShaderFileBlock('wiggle.glsl', 'static_cube_edge_exec.vert'),
+                    ShaderFileBlock('wiggle.glsl', 'model_and_view_exec.vert2'),
+                ],
+                stage=GL.GL_VERTEX_SHADER)
+        else:
+            return ShaderStage(
+                [ShaderFileBlock('wiggle.glsl', 'positions0.vert'), ],
+                GL.GL_VERTEX_SHADER)
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)

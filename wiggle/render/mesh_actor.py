@@ -50,13 +50,14 @@ class MeshActor(BaseActor):
     def dispose_gl(self):
         if self.material is not None:
             self.material.dispose_gl()
-            self.material = None
         if self.vbo is not None:
+            self.vbo.delete()
             self.vbo = None
         if self.ibo is not None:
+            self.ibo.delete()
             self.ibo = None
         if self.vao is not None:
-            GL.glDeleteVertexArrays([self.vao], 0)
+            GL.glDeleteVertexArrays(1, [self.vao, ])
             self.vao = None
         super().dispose_gl()
 

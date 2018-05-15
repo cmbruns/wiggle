@@ -20,6 +20,7 @@ class AutoInitRenderer(AbstractRenderable):
         self.is_initialized = False
 
     def init_gl(self):
+        self.dispose_gl()
         super().init_gl()
         self.is_initialized = True
 

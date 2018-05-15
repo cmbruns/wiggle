@@ -110,55 +110,6 @@ class ShaderStage(BaseShaderStage):
             self._index_one_block(block)
 
 
-class CompositeShaderStage(BaseShaderStage):
-    def __init__(self, declarations, executions, stage=GL.GL_FRAGMENT_SHADER):
-        super().__init__(stage=stage)
-        self.declarations = declarations
-        self.executions = executions
-
-    def __str__(self):
-        result = []
-        line_index = 0  # line number for final full shader
-        template_line_index = 0  # line number for template skeleton shader file
-        template_block = ShaderFileBlock('wiggle.glsl', 'shader_template.glsl')
-        self._index_one_block(template_block)
-        template_block.load()
-        file_index = self.index_for_block_file_name[template_block.info.full_file_name()]
-        for line in template_block.lines:
-            sl = str(line)
-            m_decl = re.match(r'\s*#pragma insert_declarations', sl)
-            m_exec = re.match(r'\s*#pragma insert_procedural_code', sl)
-            if m_decl:
-                line_index = self._append_blocks(self.declarations, result, line_index)
-                result.append(f'#line {template_line_index+1} {file_index}')
-                line_index += 1
-            elif m_exec:
-                line_index = self._append_blocks(self.executions, result, line_index, indent='    ')
-                result.append(f'#line {template_line_index+1} {file_index}')
-                line_index += 1
-            else:
-                result.append(str(line))
-                line_index + 1
-            template_line_index += 1
-        result = '\n'.join(result)
-        return result
-
-    def _append_blocks(self, blocks, out_lines, line_index, indent=''):
-        for block in blocks:
-            self._index_one_block(block)
-            block_line_index = 0
-            block.load()
-            file_index = self.index_for_block_file_name[block.info.full_file_name()]
-            out_lines.append(f'#line {block_line_index+1} {file_index}')
-            line_index += 1
-            for block_line in block.lines:
-                block_line.shader_line_index = line_index
-                out_lines.append(indent + str(block_line))
-                line_index += 1
-                block_line_index += 1
-        return line_index
-
-
 class ShaderBlockInfo(object):
     def __init__(self, package, file_name):
         self.package = package

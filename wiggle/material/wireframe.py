@@ -31,6 +31,10 @@ class BaseMaterial(AutoInitRenderer):
 
 
 class WireframeMaterial(BaseMaterial):
+    def __init__(self):
+        super().__init__()
+        self.line_width = 3
+
     @staticmethod
     def create_fragment_shader():
         return ShaderStage(
@@ -44,7 +48,7 @@ class WireframeMaterial(BaseMaterial):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glLineWidth(3)
+        GL.glLineWidth(self.line_width)
 
     @staticmethod
     def primitive():

@@ -7,6 +7,7 @@ from PyQt5.QtCore import QSettings
 
 import wiggle
 from .scene_canvas import SceneCanvas
+from .scene_tree_model import SceneTreeModel
 
 
 class MainWindow(QMainWindow):
@@ -22,6 +23,8 @@ class MainWindow(QMainWindow):
         self._setup_canvas()
         self.multisample_count = self.sampleCountSpinBox.value()
         self.b_multisample = self.multisampleCheckBox.checkState()
+        self.scene_model = SceneTreeModel('Test')
+        self.scene_treeView.setModel(self.scene_model)
 
     def _change_multisampling(self, sample_count):
         """Creates a new instance of SceneViewer, to support interactive changing of multisampling parameters"""

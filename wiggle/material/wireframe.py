@@ -68,7 +68,7 @@ class NormalMaterial(BaseMaterial):
 
     def create_fragment_shader(self):
         return ShaderStage(
-            [ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ],
+            [ShaderFileBlock('wiggle.glsl', 'normal_color.frag'), ],
             GL.GL_FRAGMENT_SHADER)
 
     @staticmethod

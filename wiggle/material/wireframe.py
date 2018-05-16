@@ -59,12 +59,12 @@ class NormalMaterial(BaseMaterial):
     def create_vertex_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'untransformed.vert'), ],
-            GL.GL_FRAGMENT_SHADER)
+            GL.GL_VERTEX_SHADER)
 
     def create_geometry_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'per_face_normals.geom'), ],
-            GL.GL_FRAGMENT_SHADER)
+            GL.GL_GEOMETRY_SHADER)
 
     def create_fragment_shader(self):
         return ShaderStage(

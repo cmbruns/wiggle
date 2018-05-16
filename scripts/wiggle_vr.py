@@ -4,7 +4,8 @@ from wiggle.app.vr.glfw_vr_app import GlfwVrApp
 
 
 def main():
-    cube = wiggle.render.demo.wireframe_cube_demo()
+    # cube = wiggle.render.demo.wireframe_cube_demo()
+    cube = wiggle.render.demo.color_cube_demo()
     renderer = wiggle.Renderer()
     renderer.add_actor(cube)
     with GlfwVrApp(actors=[renderer, ]) as app:

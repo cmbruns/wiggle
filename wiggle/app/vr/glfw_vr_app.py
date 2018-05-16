@@ -82,7 +82,8 @@ class GlfwVrApp(object):
 
 def main():
     import wiggle.demo
-    cube = wiggle.render.demo.wireframe_cube_demo()
+    # cube = wiggle.render.demo.wireframe_cube_demo()
+    cube = wiggle.render.demo.color_cube_demo()
     renderer = wiggle.Renderer()
     renderer.add_actor(cube)
     with GlfwVrApp(actors=[renderer, ]) as app:

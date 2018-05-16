@@ -13,6 +13,7 @@ class MeshVbo(AutoInitRenderer, VaoRenderer):
         super().__init__()
         self.mesh = mesh
         self.primitive_type = primitive_type
+        self.out_primitive_type = primitive_type
         self.vbo = None
         self.ibo = None
         self.index_type_gl = GL.GL_UNSIGNED_SHORT
@@ -24,7 +25,15 @@ class MeshVbo(AutoInitRenderer, VaoRenderer):
         vpos_location = 0  # todo: less hard coded please
         vertex_array = numpy.array(self.mesh.vertexes, dtype=numpy.float32)
         self.vbo = vbo.VBO(vertex_array)
-        index_array = numpy.array(self.mesh.edges, dtype=numpy.uint16).flatten()
+        if self.primitive_type == GL.GL_LINES:
+            indexes = self.mesh.edges
+        elif self.primitive_type == GL.GL_TRIANGLES:
+            indexes = self.mesh.triangle_strips
+            self.out_primitive_type = GL.GL_TRIANGLE_STRIP
+        else:
+            raise ValueError('primitive type not supported')
+        self.primitive_count = len(indexes)
+        index_array = numpy.array(indexes, dtype=numpy.uint16).flatten()
         self.primitive_count = len(index_array)
         GL.glEnableVertexAttribArray(vpos_location)
         self.vbo.bind()
@@ -35,7 +44,7 @@ class MeshVbo(AutoInitRenderer, VaoRenderer):
         super().display_gl(camera=camera, *args, **kwargs)
         self.vbo.bind()
         self.ibo.bind()
-        GL.glDrawElements(self.primitive_type, 24, self.index_type_gl, None)
+        GL.glDrawElements(self.out_primitive_type, self.primitive_count, self.index_type_gl, None)
 
     def dispose_gl(self):
         if self.vbo is not None:

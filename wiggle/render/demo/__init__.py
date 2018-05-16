@@ -1,11 +1,13 @@
 import wiggle
 from wiggle.render.mesh_actor import MeshActor
 from wiggle.geometry.mesh import CubeMesh
-from wiggle.material.wireframe import WireframeMaterial
+from wiggle.material.wireframe import WireframeMaterial, NormalMaterial
 
 
 def color_cube_demo():
-    cube = wiggle.ColorCubeActor()
+    cube_mesh = CubeMesh()
+    cube = MeshActor(mesh=cube_mesh, material=NormalMaterial())
+    # cube = wiggle.ColorCubeActor()
     cube.model_center = (0, 1.2, 0)
     cube.scale = 0.3
     return cube

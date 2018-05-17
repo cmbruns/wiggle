@@ -17,7 +17,7 @@ class BaseActor(AutoInitRenderer):
 
     @property
     def model_center(self):
-        return self._model_matrix.model_center
+        return self.model_matrix.model_center
 
     @model_center.setter
     def model_center(self, center):
@@ -25,7 +25,7 @@ class BaseActor(AutoInitRenderer):
 
     @property
     def scale(self):
-        return self._model_matrix.scale
+        return self.model_matrix.scale
 
     @scale.setter
     def scale(self, scale):

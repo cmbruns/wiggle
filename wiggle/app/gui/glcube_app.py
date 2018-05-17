@@ -25,7 +25,7 @@ class GlCubeApplication(QApplication):
         self.main_window.show()
 
     def load_test_scene(self):
-        if True:
+        if False:
             cube = wiggle.render.demo.color_cube_demo()
         else:
             cube = wiggle.render.demo.wireframe_cube_demo()

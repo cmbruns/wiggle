@@ -69,6 +69,16 @@ class MeshActor(BaseActor):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera=camera, *args, **kwargs)
+        GL.glUseProgram(self.material.shader)
+        for name, location in self.material.mvp_matrices.items():
+            if name == 'projection':
+                GL.glUniformMatrix4fv(location, 1, False, camera.projection)
+            elif name == 'model':
+                GL.glUniformMatrix4fv(location, 1, False, self.model_matrix.matrix)
+            elif name == 'view':
+                GL.glUniformMatrix4fv(location, 1, False, camera.view_matrix)
+            elif name == 'model_view':
+                GL.glUniformMatrix4fv(location, 1, False, (self.model_matrix @ camera.view_matrix).pack())
         self.material.display_gl(camera, *args, **kwargs)
         self.mesh_vbo.display_gl(camera=camera, *args, **kwargs)
 
@@ -76,7 +86,3 @@ class MeshActor(BaseActor):
         if self.mesh_vbo is not None:
             self.mesh_vbo.dispose_gl()
         super().dispose_gl()
-
-    @property
-    def shader(self):
-        return self.material.shader

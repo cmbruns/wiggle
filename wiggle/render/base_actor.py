@@ -11,12 +11,6 @@ class BaseActor(AutoInitRenderer):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glUseProgram(self.shader)
-        GL.glUniformMatrix4fv(0, 1, False, camera.projection)
-        GL.glUniformMatrix4fv(1, 1, False, self.model_matrix.matrix)
-        GL.glUniformMatrix4fv(2, 1, False, camera.view_matrix)
-        model_view = self.model_matrix @ camera.view_matrix
-        GL.glUniformMatrix4fv(4, 1, False, model_view.pack())
 
     def dispose_gl(self):
         super().dispose_gl()

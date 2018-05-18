@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 
 from wiggle.app.gui.main_window import MainWindow
 import wiggle.render.demo
+from wiggle.render.mesh_actor import PlaneActor
 
 # For some reason this block causes python exceptions raised during
 # rendering to crash with stack traces like I expect.
@@ -25,10 +26,9 @@ class GlCubeApplication(QApplication):
         self.main_window.show()
 
     def load_test_scene(self):
-        if False:
-            cube = wiggle.render.demo.color_cube_demo()
-        else:
-            cube = wiggle.render.demo.wireframe_cube_demo()
+        self.main_window.renderer.add_actor(PlaneActor())
+        cube = wiggle.render.demo.color_cube_demo()
+        # cube = wiggle.render.demo.wireframe_cube_demo()
         self.main_window.renderer.add_actor(cube)
 
     def run(self):

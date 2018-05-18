@@ -46,13 +46,35 @@ class BaseMaterial(AutoInitRenderer):
         self._query_matrices()
 
 
+class PlaneMaterial(BaseMaterial):
+    def create_vertex_shader(self):
+        return ShaderStage(
+            [ShaderFileBlock('wiggle.glsl', 'plane.vert'), ],
+            GL.GL_VERTEX_SHADER)
+
+    def create_fragment_shader(self):
+        return ShaderStage(
+            [ShaderFileBlock('wiggle.glsl', 'plane.frag'), ],
+            GL.GL_FRAGMENT_SHADER)
+
+    def display_gl(self, camera, *args, **kwargs):
+        super().display_gl(camera, *args, **kwargs)
+        GL.glLineWidth(20)
+        GL.glDepthRange(1, 1)  # Draw skybox at infinity...
+        GL.glDepthFunc(GL.GL_LEQUAL)  # ...but paint over other infinitely distant things, such as the result of glClear
+        GL.glEnable(GL.GL_CLIP_PLANE0)
+
+    @staticmethod
+    def primitive():
+        return GL.GL_TRIANGLES
+
+
 class WireframeMaterial(BaseMaterial):
     def __init__(self):
         super().__init__()
         self.line_width = 3
 
-    @staticmethod
-    def create_fragment_shader():
+    def create_fragment_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ],
             GL.GL_FRAGMENT_SHADER)

@@ -2,10 +2,10 @@ import numpy
 from OpenGL import GL
 from OpenGL.arrays import vbo
 
-from wiggle.geometry.mesh import CubeMesh
+from wiggle.geometry.mesh import CubeMesh, ScreenQuadMesh
 from wiggle.render.base_actor import BaseActor
 from wiggle.render.base import AutoInitRenderer, VaoRenderer
-from wiggle.material.wireframe import WireframeMaterial
+from wiggle.material.wireframe import WireframeMaterial, PlaneMaterial
 
 
 class MeshVbo(AutoInitRenderer, VaoRenderer):
@@ -86,3 +86,8 @@ class MeshActor(BaseActor):
         if self.mesh_vbo is not None:
             self.mesh_vbo.dispose_gl()
         super().dispose_gl()
+
+
+class PlaneActor(MeshActor):
+    def __init__(self):
+        super().__init__(mesh=ScreenQuadMesh(), material=PlaneMaterial())

@@ -100,6 +100,19 @@ class Mesh(object):
             self._parse_obj_line(line)
 
 
+class ScreenQuadMesh(Mesh):
+    def __init__(self, name='plane'):
+        super().__init__(name)
+        self.vertexes.extend((
+            (-1, -1, 0.5),
+            (1, -1, 0.5),
+            (1, 1, 0.5),
+            (-1, 1, 0.5),
+        ), )
+        self.faces.extend(( (0, 1, 2, 3), ), )
+        self.triangle_strips.extend((0, 1, 3, 2), )
+
+
 class CubeMesh(Mesh):
     """
        2________ 3

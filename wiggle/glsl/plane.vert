@@ -1,6 +1,8 @@
 #version 430
 
 in vec3 position_c;
+out vec4 intersection_w;
+out vec4 intersection_c;
 
 layout(location = 0) uniform mat4 projection = mat4(1);
 layout(location = 4) uniform mat4 model_view = mat4(1);
@@ -23,9 +25,11 @@ void main() {
     vec4 position_w = world_from_clip * vec4(position_c, 1);
     vec3 cam_pos_w = cam_pos_w_from_model_view(model_view);
     vec3 view_dir_w = position_w.xyz/position_w.w - cam_pos_w;
-    vec4 intersection_w = vec4(
+    intersection_w = vec4(
         cross(plane_equation_w.xyz, cross(cam_pos_w, view_dir_w)) - plane_equation_w.w * view_dir_w,  // xyz
         dot(plane_equation_w.xyz, view_dir_w));  // w
 
     gl_ClipDistance[0] = -intersection_w.w;
+
+    intersection_c = projection * model_view * intersection_w;
 }

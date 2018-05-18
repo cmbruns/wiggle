@@ -60,7 +60,7 @@ class PlaneMaterial(BaseMaterial):
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
         GL.glLineWidth(20)
-        GL.glDepthRange(1, 1)  # Draw skybox at infinity...
+        # GL.glDepthRange(1, 1)  # Draw skybox at infinity...
         GL.glDepthFunc(GL.GL_LEQUAL)  # ...but paint over other infinitely distant things, such as the result of glClear
         GL.glEnable(GL.GL_CLIP_PLANE0)
 
@@ -86,6 +86,8 @@ class WireframeMaterial(BaseMaterial):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glDepthFunc(GL.GL_LESS)
         GL.glLineWidth(self.line_width)
 
     @staticmethod

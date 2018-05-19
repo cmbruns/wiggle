@@ -42,13 +42,16 @@ void main() {
     // todo: this only works for a ground plane
     vec2 tex_coord = intersection_w.xz / intersection_w.w;
 
-    vec2 edge_dist_tc = vec2(0.5) - abs(fract(tex_coord) - vec2(0.5));
-    vec2 edge_dist_pixel = edge_dist_tc = fwidth(tex_coord);
+    // point_color and edge_color are texcoord texture specific
+    vec4 point_color = vec4(fract(tex_coord), 1, 1);
+    vec4 edge_color = vec4(0.5, 0.5, 1, 1); // wrong
 
     vec2 edge_nearness = 2.0 * abs(fract(tex_coord) - vec2(0.5));
     vec2 edge_distance = vec2(1) - edge_nearness;
-    vec2 edge_dist_pixels = clamp(edge_distance/fwidth(tex_coord), 0, 1);
-    vec2 color1 = mix(vec2(0.5, 0.5), fract(tex_coord), edge_dist_pixels);
+    vec2 edge_dist_pixels = 0.4 * edge_distance/fwidth(tex_coord);
+    edge_dist_pixels = clamp(edge_dist_pixels, 0, 1);
+    vec2 blend = edge_dist_pixels;
+    vec2 color1 = mix(vec2(0.5, 0.5), fract(tex_coord), blend);
     frag_color = vec4(color1, 0.5, 1);
     return;
 }

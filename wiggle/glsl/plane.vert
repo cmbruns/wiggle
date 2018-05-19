@@ -22,7 +22,7 @@ out vec4 intersection_w;
 out vec4 intersection_c;
 
 
-// Extract camera location in world sapce, from view matrix
+// Extract camera location in world space, from view matrix
 vec3 cam_pos_w_from_view(in mat4 view)
 {
     // assuming no scaling
@@ -50,7 +50,7 @@ void main()
     // Extract camera location in world space
     vec3 cam_pos_w = cam_pos_w_from_view(view);
 
-    // View direction, not normalized
+    // View direction (not normalized, normalization not required)
     vec3 view_dir_w = position_w.xyz/position_w.w - cam_pos_w;
 
     // Compute intersection of view ray with plane.

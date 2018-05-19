@@ -30,7 +30,7 @@ vec3 dehomog(vec4 v)
 
 void main()
 {
-    // Screen-quad corner coordinates arrive dirctly in clip-space
+    // Screen-quad corner coordinates arrive dirctly in clip-space.
     // Pass them through unchanged.
  	gl_Position = vec4(position_c, 1);
 
@@ -54,6 +54,9 @@ void main()
 
     // Compute intersection of view ray with plane, in model space.
     // Homogenous coordinates allow correct shader interpolation.
+    // I expect the compiler to apply the obvious simplifications, since
+    // plane_m is const. I'm leaving the full equation here, because it took
+    // a while to derive.
     intersection_m = vec4(
         cross(plane_m.xyz, cross(cam_pos_m, view_dir_m)) - plane_m.w * view_dir_m,  // xyz
         dot(plane_m.xyz, view_dir_m));  // w

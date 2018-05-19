@@ -12,7 +12,7 @@ vec2 edge_distance(in vec2 tc)
     vec2 ftc = fract(tc);
     vec2 edge_distance = min(ftc, vec2(1) - ftc);
     vec2 width = fwidth(tc); // todo: vary this method
-    vec2 edge_dist_pixels = 0.7 * edge_distance/width; // todo: vary coefficient
+    vec2 edge_dist_pixels = 2.0 * edge_distance/width; // todo: vary coefficient
     edge_dist_pixels = clamp(edge_dist_pixels, 0.0, 1.0);
     return edge_dist_pixels;
 }

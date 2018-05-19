@@ -1,7 +1,8 @@
 #version 430
 
-in vec4 intersection_c;  // in clip space
+in vec4 intersection_m;  // in model space
 in vec4 intersection_w;  // in world space
+in vec4 intersection_c;  // in clip space
 
 out vec4 frag_color;
 
@@ -63,7 +64,7 @@ void main()
     gl_FragDepth = (intersection_c.z / intersection_c.w + 1.0) / 2.0;
 
     // todo: this texture coordinate only works for a ground plane
-    vec2 tc = intersection_w.xz / intersection_w.w;
+    vec2 tc = intersection_m.xz / intersection_m.w;
 
     frag_color = texture_color(tc);
 }

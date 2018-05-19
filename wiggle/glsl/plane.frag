@@ -5,6 +5,37 @@ in vec4 intersection_w;  // in world space
 
 out vec4 frag_color;
 
+vec4 tc_color(in vec2 uv)
+{
+    return vec4(fract(uv), 1, 1);
+}
+
+vec4 checker_color(in vec2 uv)
+{
+    vec4 c1 = vec4(0.1, 0.1, 0.1, 1);
+    vec4 c2 = vec4(0.6, 0.6, 0.5, 1);
+    // http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch25.html
+    float p = mod(floor(uv.x) + floor(uv.y), 2);
+    if (p < 1) return c1;
+    return c2;
+}
+
+vec4 color(in vec2 uv)
+{
+    return checker_color(uv);
+}
+
+vec4 antialias(in vec2 uv)
+{
+    // http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch25.html
+    vec2 width = fwidth(uv);
+    vec2 p0 = uv - 0.5 * width;
+    vec2 p1 = uv + 0.5 * width;
+    vec2 p2 = vec2(p0.x, p1.y);
+    vec2 p3 = vec2(p1.x, p0.y);
+    return 0.25 * (color(p0) + color(p1) + color(p2) + color(p3));
+}
+
 void main() {
     gl_FragDepth = (intersection_c.z / intersection_c.w + 1.0) / 2.0;
 
@@ -19,17 +50,5 @@ void main() {
     vec2 edge_dist_pixels = clamp(edge_distance/fwidth(tex_coord), 0, 1);
     vec2 color1 = mix(vec2(0.5, 0.5), fract(tex_coord), edge_dist_pixels);
     frag_color = vec4(color1, 0.5, 1);
-    // frag_color = vec4(edge_distance, 0.5, 1);
     return;
-
-    vec2 color = fract(tex_coord);
-    float red = smoothstep(color.r, 0.5, edge_dist_pixel.x);
-    float green = smoothstep(color.g, 0.5, edge_dist_pixel.y);
-
-    // far away antialiasing
-    // todo:
-
-    frag_color = vec4(red, green, 0.5, 1);
-    // frag_color = vec4(0.5, 0.8, 0.5, 1.0);
-
 }

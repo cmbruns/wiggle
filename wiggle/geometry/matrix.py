@@ -119,7 +119,7 @@ class Matrix4f(MatrixBase):
              (t*x*y + s*z, t*y*y + c,  t*y*z - s*x, 0),
              (t*x*z - s*y, t*y*z + s*x, t*z*z + c, 0),
              (0, 0, 0, 1),)
-        )
+        ).transpose()
 
     @classmethod
     def scale(cls, scale):
@@ -144,6 +144,7 @@ class ModelMatrix(object):
     def __init__(self):
         self._center = numpy.array([0, 0, 0], dtype='float32')
         self._scale = 1.0
+        self._rotation = Matrix4f.identity()
         self._needs_update = True
         self._matrix = None
 
@@ -153,7 +154,7 @@ class ModelMatrix(object):
     @property
     def matrix(self):
         if self._needs_update:
-            self._matrix = (Matrix4f.scale(self._scale) @ Matrix4f.translation(*self._center)).pack()
+            self._matrix = (Matrix4f.scale(self._scale) @ self._rotation @ Matrix4f.translation(*self._center)).pack()
         return self._matrix
 
     @property
@@ -166,10 +167,19 @@ class ModelMatrix(object):
         self._center[:] = center[:]
 
     @property
-    def scale(self):
+    def model_rotation(self):
+        return self._rotation
+
+    @model_rotation.setter
+    def model_rotation(self, rotation):
+        self._needs_update = True
+        self._rotation = rotation
+
+    @property
+    def model_scale(self):
         return self._scale
 
-    @scale.setter
-    def scale(self, scale):
+    @model_scale.setter
+    def model_scale(self, scale):
         self._needs_update = True
         self._scale = scale

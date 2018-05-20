@@ -24,9 +24,17 @@ class BaseActor(AutoInitRenderer):
         self.model_matrix.model_center = center
 
     @property
-    def scale(self):
-        return self.model_matrix.scale
+    def model_rotation(self):
+        return self.model_matrix.model_rotation
 
-    @scale.setter
-    def scale(self, scale):
-        self.model_matrix.scale = scale
+    @model_rotation.setter
+    def model_rotation(self, rotation):
+        self.model_matrix.model_rotation = rotation
+
+    @property
+    def model_scale(self):
+        return self.model_matrix.model_scale
+
+    @model_scale.setter
+    def model_scale(self, scale):
+        self.model_matrix.model_scale = scale

@@ -46,7 +46,7 @@ class SceneCanvas(QOpenGLWidget):
             return
         scale = math.sqrt(1.0 / scale)
         rotation_axis = (scale * dy, scale * dx, 0)
-        angle = -0.01 * (abs(dx) + abs(dy))
+        angle = 0.01 * (abs(dx) + abs(dy))
         self.camera.rotate(rotation_axis, angle)
         self.update()
 

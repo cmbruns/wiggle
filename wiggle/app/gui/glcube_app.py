@@ -26,10 +26,7 @@ class GlCubeApplication(QApplication):
         self.main_window.show()
 
     def load_test_scene(self):
-        self.main_window.renderer.add_actor(PlaneActor())
-        cube = wiggle.render.demo.color_cube_demo()
-        # cube = wiggle.render.demo.wireframe_cube_demo()
-        self.main_window.renderer.add_actor(cube)
+        wiggle.render.demo.load_test_scene(self.main_window.renderer)
 
     def run(self):
         sys.exit(self.exec_())

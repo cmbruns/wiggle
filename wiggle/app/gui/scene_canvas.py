@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QOpenGLWidget, QApplication
 from PyQt5.QtGui import QSurfaceFormat
 
-import wiggle
+from wiggle.geometry.camera import PerspectiveCamera
 
 _log_level = logging.WARN
 logging.basicConfig(level=_log_level)
@@ -19,7 +19,7 @@ class SceneCanvas(QOpenGLWidget):
         self.is_dragging = False
         self.mouse_location = None
         self.renderer = None
-        self.camera = wiggle.PerspectiveCamera()
+        self.camera = PerspectiveCamera()
         format_ = QSurfaceFormat()
         format_.setSamples(samples)
         self.setFormat(format_)

@@ -5,7 +5,8 @@ from PyQt5.Qt import QCoreApplication, QModelIndex
 from PyQt5.QtWidgets import QMainWindow, QPushButton
 from PyQt5.QtCore import QSettings
 
-import wiggle
+from wiggle.geometry.camera import PerspectiveCamera
+from wiggle.render.renderer import Renderer
 from .scene_canvas import SceneCanvas
 from .scene_tree_model import SceneTreeModel
 
@@ -16,10 +17,10 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self.read_settings()
         self.clear_settings()
-        self.camera = wiggle.PerspectiveCamera()
+        self.camera = PerspectiveCamera()
         self.camera.focus = (0, 1.2, 0)
         self.camera.distance = 2
-        self.renderer = wiggle.Renderer()
+        self.renderer = Renderer()
         self._setup_canvas()
         self.multisample_count = self.sampleCountSpinBox.value()
         self.b_multisample = self.multisampleCheckBox.checkState()

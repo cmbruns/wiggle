@@ -1,6 +1,6 @@
 from OpenGL import GL
 
-from wiggle import AutoInitRenderer
+from wiggle.render.base import AutoInitRenderer
 from wiggle.material.shader import ShaderProgram
 
 

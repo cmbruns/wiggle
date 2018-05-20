@@ -34,7 +34,6 @@ class RenderPass(AutoInitRenderer, ParentRenderer):
         self._is_wireframe = wireframe
 
 
-
 class SkyPass(RenderPass):
     def __init__(self):
         super().__init__(100)

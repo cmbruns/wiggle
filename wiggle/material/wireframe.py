@@ -1,6 +1,9 @@
 from enum import Enum
+import pkg_resources
 
+from PIL import Image
 from OpenGL import GL
+from OpenGL.GL.EXT.texture_filter_anisotropic import GL_TEXTURE_MAX_ANISOTROPY_EXT, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
 
 from wiggle import AutoInitRenderer
 from wiggle.material.shader import ShaderFileBlock, ShaderProgram, ShaderStage
@@ -62,7 +65,10 @@ class PlaneMaterial(BaseMaterial):
     def __init__(self):
         super().__init__()
         self.render_mode_index = None
-        self.render_mode = self.RenderMode.CHECKER
+        self.render_mode = self.RenderMode.TEXTURE
+        img_stream = pkg_resources.resource_stream('wiggle.images', 'uv_test.png')
+        self.test_image = Image.open(img_stream, 'r')
+        self.texture_id = None
 
     def create_vertex_shader(self):
         return ShaderStage(
@@ -79,11 +85,36 @@ class PlaneMaterial(BaseMaterial):
         GL.glLineWidth(20)
         GL.glDepthFunc(GL.GL_LEQUAL)  # ...but paint over other infinitely distant things, such as the result of glClear
         GL.glEnable(GL.GL_CLIP_PLANE0)
+        #
         GL.glUniform1i(self.render_mode_index, self.render_mode.value)
+        if self.render_mode == self.RenderMode.TEXTURE:
+            GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture_id)
 
     def init_gl(self):
         super().init_gl()
         self.render_mode_index = GL.glGetUniformLocation(self.shader, 'render_mode')
+        #
+        self.texture_id = GL.glGenTextures(1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture_id)
+        GL.glTexImage2D(
+            GL.GL_TEXTURE_2D,
+            0,  # level-of-detail
+            GL.GL_RGB,  # internal format
+            self.test_image.size[0],  # width
+            self.test_image.size[1],  # height
+            0,  # border, must be zero
+            GL.GL_RGB,  # format
+            GL.GL_UNSIGNED_BYTE,  # type
+            self.test_image.tobytes('raw', 'RGB', 0, -1)
+        )
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+        fLargest = GL.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest)
+        GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+
+    def dispose_gl(self):
+        super().dispose_gl()
 
 
 class WireframeMaterial(BaseMaterial):

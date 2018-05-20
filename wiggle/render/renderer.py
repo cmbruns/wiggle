@@ -5,7 +5,7 @@ from wiggle.render.base import AbstractRenderable, AutoInitRenderer, ParentRende
 
 class ScreenClearer(AbstractRenderable):
     """Initializes the display to a solid color, and clears depth buffer"""
-    def __init__(self, red=0.5, green=0.5, blue=0.5, alpha=1.0):
+    def __init__(self, red=0.7, green=0.7, blue=0.7, alpha=1.0):
         self.red = float(red)
         self.green = float(green)
         self.blue = float(blue)

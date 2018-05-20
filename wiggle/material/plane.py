@@ -31,6 +31,11 @@ class PlaneMaterial(BaseMaterial):
         self.test_image = Image.open(img_stream, 'r')
         self.texture_id = None
 
+    def _configure_depth(self):
+        # paint over other infinitely distant things, such as the result of glClear
+        GL.glDepthFunc(GL.GL_LEQUAL)
+        GL.glDepthRange(0, 1)
+
     def create_vertex_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'plane.vert'), ],
@@ -43,7 +48,6 @@ class PlaneMaterial(BaseMaterial):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glDepthFunc(GL.GL_LEQUAL)  # ...but paint over other infinitely distant things, such as the result of glClear
         GL.glEnable(GL.GL_CLIP_PLANE0)
         #
         GL.glUniform1i(self.render_mode_index, self.render_mode.value)
@@ -82,10 +86,13 @@ class PlaneHorizonLineMaterial(PlaneMaterial):
         self.line_width = 10
         self.color = numpy.array([1, 1, 1], dtype=numpy.float32)
 
+    def _configure_depth(self):
+        GL.glDepthFunc(GL.GL_LEQUAL)
+        GL.glDepthRange(1, 1)
+
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
         GL.glLineWidth(self.line_width)
-        GL.glDepthRange(1, 1)
 
     def create_geometry_shader(self):
         return ShaderStage(

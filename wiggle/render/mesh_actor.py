@@ -10,6 +10,14 @@ from wiggle.material.plane import PlaneMaterial, PlaneHorizonLineMaterial
 from wiggle.material.normal import NormalMaterial
 
 
+class MeshIndexBuffer(AutoInitRenderer):
+    def __init__(self, mesh, primitive_type):
+        super().__init__()
+        self.mesh = mesh
+        self.primitive_type = primitive_type
+        self.ibo = None
+
+
 class MeshVbo(AutoInitRenderer, VaoRenderer):
     def __init__(self, mesh, primitive_type):
         super().__init__()
@@ -60,6 +68,11 @@ class MeshVbo(AutoInitRenderer, VaoRenderer):
 
 class MeshActor(BaseActor):
     def __init__(self, mesh=CubeMesh(), material=NormalMaterial(), wireframe_material=WireframeMaterial()):
+        """
+        :type mesh: BaseMesh
+        :type material: BaseMaterial
+        :type wireframe_material: BaseMaterial
+        """
         super().__init__()
         self.material = material
         self.wireframe_material = wireframe_material

@@ -8,6 +8,8 @@
 layout (triangles) in ;
 layout (line_strip, max_vertices = 2) out;
 
+// Pass dummy versions of vertex shader outputs; they won't be used in
+// wireframe mode.
 out vec4 intersection_m;
 out vec4 intersection_w;
 out vec4 intersection_c;
@@ -21,9 +23,6 @@ int check_segment(in int ix1, in int ix2)
 
     float alpha = c1 / (c1 - c2);
     gl_Position = mix(gl_in[ix1].gl_Position, gl_in[ix2].gl_Position, alpha);
-    intersection_c = vec4(1);
-    intersection_w = vec4(1);
-    intersection_m = vec4(1);
 
     EmitVertex();
     return 1;
@@ -31,6 +30,12 @@ int check_segment(in int ix1, in int ix2)
 
 void main(void)
 {
+    // Pass dummy versions of vertex shader outputs; they won't be used in
+    // wireframe mode.
+    intersection_c = vec4(1);
+    intersection_w = vec4(1);
+    intersection_m = vec4(1);
+
     int point_count = 0;
     point_count += check_segment(0, 1);
     point_count += check_segment(1, 2);

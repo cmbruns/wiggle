@@ -10,6 +10,11 @@ class BaseMaterial(AutoInitRenderer):
         self.shader = None
         self.mvp_matrices = dict()
 
+    def _configure_depth(self):
+        # standard parameters to possibly override in base classes
+        GL.glDepthFunc(GL.GL_LESS)
+        GL.glDepthRange(0, 1)
+
     def _query_matrices(self):
         """Note which model, view, projection, etc. matrices are needed to run this shader"""
         num_active_uniforms = GL.glGetProgramiv(self.shader, GL.GL_ACTIVE_UNIFORMS)
@@ -44,6 +49,7 @@ class BaseMaterial(AutoInitRenderer):
         self._query_matrices()
 
     def display_gl(self, *args, **kwargs):
+        self._configure_depth()
         super().display_gl(*args, **kwargs)
         GL.glUseProgram(self.shader)
 

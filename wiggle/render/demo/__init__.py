@@ -1,7 +1,8 @@
 import wiggle
 from wiggle.render.mesh_actor import MeshActor
 from wiggle.geometry.mesh import CubeMesh
-from wiggle.material.wireframe import WireframeMaterial, NormalMaterial
+from wiggle.material.wireframe import WireframeMaterial
+from wiggle.material.normal import NormalMaterial
 
 
 def color_cube_demo():

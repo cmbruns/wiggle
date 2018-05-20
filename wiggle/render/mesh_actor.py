@@ -5,7 +5,9 @@ from OpenGL.arrays import vbo
 from wiggle.geometry.mesh import CubeMesh, ScreenQuadMesh
 from wiggle.render.base_actor import BaseActor
 from wiggle.render.base import AutoInitRenderer, VaoRenderer
-from wiggle.material.wireframe import WireframeMaterial, PlaneMaterial
+from wiggle.material.wireframe import WireframeMaterial
+from wiggle.material.plane import PlaneMaterial, PlaneHorizonLineMaterial
+from wiggle.material.normal import NormalMaterial
 
 
 class MeshVbo(AutoInitRenderer, VaoRenderer):
@@ -57,20 +59,22 @@ class MeshVbo(AutoInitRenderer, VaoRenderer):
 
 
 class MeshActor(BaseActor):
-    def __init__(self, mesh=CubeMesh(), material=WireframeMaterial()):
+    def __init__(self, mesh=CubeMesh(), material=NormalMaterial(), wireframe_material=WireframeMaterial()):
         super().__init__()
         self.material = material
+        self.wireframe_material = wireframe_material
         self.mesh_vbo = MeshVbo(mesh, material.primitive())
+        self.wireframe = False
 
     def init_gl(self):
         super().init_gl()
-        self.material.init_gl()
         self.mesh_vbo.init_gl()
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera=camera, *args, **kwargs)
-        GL.glUseProgram(self.material.shader)
-        for name, location in self.material.mvp_matrices.items():
+        mat = self.wireframe_material if self.wireframe else self.material
+        mat.display_gl(camera, *args, **kwargs)
+        for name, location in mat.mvp_matrices.items():
             if name == 'projection':
                 GL.glUniformMatrix4fv(location, 1, False, camera.projection)
             elif name == 'model':
@@ -79,7 +83,6 @@ class MeshActor(BaseActor):
                 GL.glUniformMatrix4fv(location, 1, False, camera.view_matrix)
             elif name == 'model_view':
                 GL.glUniformMatrix4fv(location, 1, False, (self.model_matrix @ camera.view_matrix).pack())
-        self.material.display_gl(camera, *args, **kwargs)
         self.mesh_vbo.display_gl(camera=camera, *args, **kwargs)
 
     def dispose_gl(self):
@@ -90,4 +93,7 @@ class MeshActor(BaseActor):
 
 class PlaneActor(MeshActor):
     def __init__(self):
-        super().__init__(mesh=ScreenQuadMesh(), material=PlaneMaterial())
+        super().__init__(
+            mesh=ScreenQuadMesh(),
+            material=PlaneMaterial(),
+            wireframe_material=PlaneHorizonLineMaterial())

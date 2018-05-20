@@ -65,6 +65,11 @@ void main()
     // (this also allows MSAA to function on the horizon, unlike discard)
     gl_ClipDistance[0] = -intersection_m.w;
 
+    // If the camera is under the plane, look only above the horizon
+    // todo: optionally draw nothing in this case
+    if (cam_pos_m.y < 0)
+        gl_ClipDistance[0] *= -1;
+
     // World coordinates too, for parallax adjustment
     intersection_w = model_view * intersection_m;
 

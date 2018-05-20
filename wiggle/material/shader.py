@@ -46,6 +46,8 @@ class BaseShaderStage(object):
     def _format_warnings(self, log):
         log = log.replace(r'\n', '\n')
         log = log.replace(r"\'", "'")
+        log = log.lstrip('\"\'')
+        log = log.rstrip('\'\"')
         lines = list()
         for line in log.split('\n'):
             line = line.strip()
@@ -79,7 +81,7 @@ class BaseShaderStage(object):
             # Shader compile failure (0): b'0(34) : warning C7022: unrecognized profile specifier "bork"\n0(34) : error C7558: OpenGL does not allow profile specifiers on declarations\n'
             error_message = msg.args[0]
             new_message = list()
-            m = re.match(r'^(Shader compile failure \(\d+\):) b\'(.*)\'', error_message)
+            m = re.match(r'^(Shader compile failure \(\d+\):) b(.*)', error_message)
             if m:
                 new_message.append(f' {m.group(1)}')  # Shader compile failure (0):
                 new_message.append(self._format_warnings(m.group(2)))

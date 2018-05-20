@@ -96,3 +96,4 @@ class MainWindow(QMainWindow):
     def toggle_wireframe(self, checked):
         self.lineWidth_doubleSpinBox.setEnabled(checked)
         print('wireframe', checked)
+        self.renderer.wireframe = checked

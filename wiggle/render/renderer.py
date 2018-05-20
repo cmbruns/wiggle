@@ -21,6 +21,18 @@ class RenderPass(AutoInitRenderer, ParentRenderer):
     def __init__(self, order):
         super().__init__()
         self.order = order  # lower numbered passes are rendered before higher numbered ones
+        self._is_wireframe = False
+
+    @property
+    def wireframe(self):
+        return self._is_wireframe
+
+    @wireframe.setter
+    def wireframe(self, wireframe):
+        for item in self.children:
+            item.wireframe = wireframe
+        self._is_wireframe = wireframe
+
 
 
 class SkyPass(RenderPass):
@@ -54,9 +66,19 @@ class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
         self.opaque_pass = OpaquePass()
         self.children.clear()
         self.children.append(self.sky_pass)
+        self._is_wireframe = False
 
     def add_actor(self, actor):
         pass_ = self.opaque_pass
         pass_.children.append(actor)
         if pass_ not in self.children:
             self.children.append(pass_)
+
+    @property
+    def wireframe(self):
+        return self._is_wireframe
+
+    @wireframe.setter
+    def wireframe(self, wireframe):
+        self._is_wireframe = wireframe
+        self.opaque_pass.wireframe = wireframe

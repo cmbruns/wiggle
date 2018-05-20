@@ -83,7 +83,7 @@ class PlaneHorizonLineMaterial(PlaneMaterial):
     def __init__(self):
         super().__init__()
         self.render_mode = self.RenderMode.SOLID
-        self.line_width = 10
+        self.line_width = 2
         self.color = numpy.array([1, 1, 1], dtype=numpy.float32)
 
     def _configure_depth(self):

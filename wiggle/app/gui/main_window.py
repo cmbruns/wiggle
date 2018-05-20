@@ -97,3 +97,4 @@ class MainWindow(QMainWindow):
         self.lineWidth_doubleSpinBox.setEnabled(checked)
         print('wireframe', checked)
         self.renderer.wireframe = checked
+        self.openGLWidget.update()

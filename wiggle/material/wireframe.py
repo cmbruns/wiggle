@@ -7,11 +7,11 @@ from wiggle.material.shader import ShaderFileBlock, ShaderStage
 class WireframeMaterial(BaseMaterial):
     def __init__(self):
         super().__init__()
-        self.line_width = 3
+        self.line_width = 2
 
     def create_fragment_shader(self):
         return ShaderStage(
-            [ShaderFileBlock('wiggle.glsl', 'white_color.frag'), ],
+            [ShaderFileBlock('wiggle.glsl', 'color.frag'), ],
             GL.GL_FRAGMENT_SHADER)
 
     def create_vertex_shader(self):

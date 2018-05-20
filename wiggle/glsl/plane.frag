@@ -8,7 +8,7 @@ const int RENDER_MODE_TEX_COORD = 3;
 uniform int render_mode = RENDER_MODE_SOLID;
 
 uniform sampler2D image;
-uniform vec3 plane_color = vec3(0.6, 0.6, 0.3);
+uniform vec3 plane_color = vec3(0.5);
 
 in vec4 intersection_m;  // in model space
 in vec4 intersection_w;  // in world space

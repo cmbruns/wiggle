@@ -89,6 +89,8 @@ vec4 texture_color(vec2 tc)
 void main()
 {
     gl_FragDepth = (intersection_c.z / intersection_c.w + 1.0) / 2.0;
+    if (gl_FragDepth < 0)
+        discard;  // respect near clip plane
     // orient texture coordinates u, v along +x, +z in the plane model space
     vec2 tc = vec2(1, -1) * intersection_m.xz / intersection_m.w;
     frag_color = texture_color(tc);

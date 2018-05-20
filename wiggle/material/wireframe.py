@@ -1,8 +1,8 @@
-import numpy
+from enum import Enum
+
 from OpenGL import GL
 
 from wiggle import AutoInitRenderer
-
 from wiggle.material.shader import ShaderFileBlock, ShaderProgram, ShaderStage
 
 
@@ -45,8 +45,25 @@ class BaseMaterial(AutoInitRenderer):
         self.shader = int(ShaderProgram(stages))
         self._query_matrices()
 
+    def primitive(self):
+        return GL.GL_TRIANGLES
+
 
 class PlaneMaterial(BaseMaterial):
+    class RenderMode(Enum):
+        """
+        Synchronize these values with those in plane.frag
+        """
+        SOLID = 0
+        TEXTURE = 1
+        CHECKER = 2
+        TEX_COORD = 3
+
+    def __init__(self):
+        super().__init__()
+        self.render_mode_index = None
+        self.render_mode = self.RenderMode.CHECKER
+
     def create_vertex_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'plane.vert'), ],
@@ -60,13 +77,13 @@ class PlaneMaterial(BaseMaterial):
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
         GL.glLineWidth(20)
-        # GL.glDepthRange(1, 1)  # Draw skybox at infinity...
         GL.glDepthFunc(GL.GL_LEQUAL)  # ...but paint over other infinitely distant things, such as the result of glClear
         GL.glEnable(GL.GL_CLIP_PLANE0)
+        GL.glUniform1i(self.render_mode_index, self.render_mode.value)
 
-    @staticmethod
-    def primitive():
-        return GL.GL_TRIANGLES
+    def init_gl(self):
+        super().init_gl()
+        self.render_mode_index = GL.glGetUniformLocation(self.shader, 'render_mode')
 
 
 class WireframeMaterial(BaseMaterial):

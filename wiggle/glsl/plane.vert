@@ -65,8 +65,10 @@ void main()
     // (this also allows MSAA to function on the horizon, unlike discard)
     gl_ClipDistance[0] = -intersection_m.w;
 
+    // World coordinates too, for parallax adjustment
+    intersection_w = model_view * intersection_m;
+
     // Precompute intersection in clip coordinates, to simplify
     // gl_FragDepth computation
-    intersection_w = model_view * intersection_m;
     intersection_c = projection * intersection_w;
 }

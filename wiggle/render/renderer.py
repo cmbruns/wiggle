@@ -1,6 +1,6 @@
 from OpenGL import GL
 
-from wiggle.render.base import AbstractRenderable, AutoInitRenderer, ParentRenderer, VaoRenderer
+from wiggle.render.base import AbstractRenderable, AutoInitRenderer, ParentRenderer, VaoRenderer, RenderPassType
 
 
 class ScreenClearer(AbstractRenderable):
@@ -18,10 +18,32 @@ class ScreenClearer(AbstractRenderable):
 
 
 class RenderPass(AutoInitRenderer, ParentRenderer):
-    def __init__(self, order):
+    def __init__(self, pass_type):
+        """
+
+        :type pass_type: RenderPassType
+        """
         super().__init__()
-        self.order = order  # lower numbered passes are rendered before higher numbered ones
+        self.pass_type = pass_type
         self._is_wireframe = False
+
+    def __eq__(self, other):
+        return self.pass_type.value == other.pass_type.value
+
+    def __ne__(self, other):
+        return self.pass_type.value != other.pass_type.value
+
+    def __lt__(self, other):
+        return self.pass_type.value < other.pass_type.value
+
+    def __le__(self, other):
+        return self.pass_type.value <= other.pass_type.value
+
+    def __gt__(self, other):
+        return self.pass_type.value > other.pass_type.value
+
+    def __ge__(self, other):
+        return self.pass_type.value >= other.pass_type.value
 
     @property
     def wireframe(self):
@@ -36,7 +58,7 @@ class RenderPass(AutoInitRenderer, ParentRenderer):
 
 class SkyPass(RenderPass):
     def __init__(self):
-        super().__init__(100)
+        super().__init__(RenderPassType.SKY)
         # Default sky box is solid gray
         self.children.append(ScreenClearer())
 
@@ -47,13 +69,26 @@ class SkyPass(RenderPass):
         super().display_gl(*args, **kwargs)
 
 
+class GroundPass(RenderPass):
+    def __init__(self):
+        super().__init__(RenderPassType.GROUND)
+
+    def display_gl(self, *args, **kwargs):
+        # The sky has no finite depth
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glDepthMask(True)
+        GL.glDepthFunc(GL.GL_LEQUAL)
+        super().display_gl(*args, **kwargs)
+
+
 class OpaquePass(RenderPass):
     def __init__(self):
-        super().__init__(400)
+        super().__init__(RenderPassType.OPAQUE)
 
     def display_gl(self, *args, **kwargs):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthMask(True)
+        GL.glDepthFunc(GL.GL_LESS)
         super().display_gl(*args, **kwargs)
 
 
@@ -62,16 +97,23 @@ class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
     def __init__(self):
         super().__init__()
         self.sky_pass = SkyPass()
+        self.ground_pass = GroundPass()
         self.opaque_pass = OpaquePass()
         self.children.clear()
         self.children.append(self.sky_pass)
         self._is_wireframe = False
 
     def add_actor(self, actor):
-        pass_ = self.opaque_pass
+        pass_switcher = {
+            RenderPassType.SKY: self.sky_pass,
+            RenderPassType.GROUND: self.ground_pass,
+            RenderPassType.OPAQUE: self.opaque_pass,
+        }
+        pass_ = pass_switcher.get(actor.default_render_pass, self.opaque_pass)
         pass_.children.append(actor)
         if pass_ not in self.children:
             self.children.append(pass_)
+            self.children[:] = sorted(self.children[:])
 
     @property
     def wireframe(self):
@@ -80,4 +122,5 @@ class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
     @wireframe.setter
     def wireframe(self, wireframe):
         self._is_wireframe = wireframe
-        self.opaque_pass.wireframe = wireframe
+        for pass_ in self.children:
+            pass_.wireframe = wireframe

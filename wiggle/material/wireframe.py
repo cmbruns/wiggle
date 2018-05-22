@@ -21,8 +21,6 @@ class WireframeMaterial(BaseMaterial):
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glEnable(GL.GL_DEPTH_TEST)
-        GL.glDepthFunc(GL.GL_LESS)
         GL.glLineWidth(self.line_width)
 
     def primitive(self):

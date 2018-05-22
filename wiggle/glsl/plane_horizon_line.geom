@@ -23,6 +23,7 @@ int check_segment(in int ix1, in int ix2)
 
     float alpha = c1 / (c1 - c2);
     gl_Position = mix(gl_in[ix1].gl_Position, gl_in[ix2].gl_Position, alpha);
+    gl_Position.z = gl_Position.w;  // push depth to 1
 
     EmitVertex();
     return 1;

@@ -1,6 +1,7 @@
 from math import radians
 
-from wiggle.render.mesh_actor import MeshActor, PlaneActor
+from wiggle.render.mesh_actor import MeshActor
+from wiggle.render.plane_actor import PlaneActor
 from wiggle.geometry.mesh import CubeMesh
 from wiggle.material.normal import NormalMaterial
 from wiggle.geometry.matrix import Matrix4f
@@ -9,7 +10,8 @@ from wiggle.geometry.matrix import Matrix4f
 def load_test_scene(renderer):
     plane = PlaneActor()
     plane.model_center = (0, 0, 0)
-    plane.model_rotation = Matrix4f.rotation(axis=(1, 0, 0), radians=radians(0))
+    plane.model_rotation = Matrix4f.rotation(axis=(0, 1, 0), radians=radians(0))
+    plane.model_scale = 1.0
     renderer.add_actor(plane)
     cube = MeshActor(mesh=CubeMesh(), material=NormalMaterial())
     cube.model_center = (0, 1.2, 0)

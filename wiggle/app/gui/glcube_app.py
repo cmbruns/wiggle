@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 
 from wiggle.app.gui.main_window import MainWindow
 import wiggle.render.demo
-from wiggle.render.mesh_actor import PlaneActor
+from wiggle.render.plane_actor import PlaneActor
 
 # For some reason this block causes python exceptions raised during
 # rendering to crash with stack traces like I expect.

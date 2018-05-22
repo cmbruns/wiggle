@@ -1,7 +1,21 @@
+import enum
+
 from OpenGL import GL
 
 
+class RenderPassType(enum.Enum):
+    """
+    Lower numbered passes are rendered before higher numbered ones.
+    """
+    SKY = 100
+    GROUND = 200
+    OPAQUE = 300
+
+
 class AbstractRenderable(object):
+    def __init__(self, render_pass=RenderPassType.OPAQUE):
+        self.default_render_pass = render_pass
+
     """Contains stub methods for OpenGL rendering"""
     def init_gl(self):
         pass
@@ -15,8 +29,8 @@ class AbstractRenderable(object):
 
 class AutoInitRenderer(AbstractRenderable):
     """Manages auto-gl_init-ialization of a static renderable"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.is_initialized = False
 
     def init_gl(self):

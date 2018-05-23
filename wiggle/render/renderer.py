@@ -6,6 +6,7 @@ from wiggle.render.base import AbstractRenderable, AutoInitRenderer, ParentRende
 class ScreenClearer(AbstractRenderable):
     """Initializes the display to a solid color, and clears depth buffer"""
     def __init__(self, red=0.7, green=0.7, blue=0.7, alpha=1.0):
+        super().__init__(render_pass=RenderPassType.SKY)
         self.red = float(red)
         self.green = float(green)
         self.blue = float(blue)
@@ -64,7 +65,7 @@ class SkyPass(RenderPass):
 
     def display_gl(self, *args, **kwargs):
         # The sky has no finite depth
-        GL.glDisable(GL.GL_DEPTH_TEST)  # todo: unless we render sky last?
+        GL.glDisable(GL.GL_DEPTH_TEST)  # Last to paint anywhere wins
         GL.glDepthMask(False)
         super().display_gl(*args, **kwargs)
 
@@ -77,7 +78,7 @@ class GroundPass(RenderPass):
         # The sky has no finite depth
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthMask(True)
-        GL.glDepthFunc(GL.GL_LEQUAL)
+        GL.glDepthFunc(GL.GL_LEQUAL)  # Paint over existing background, even at infinity.
         super().display_gl(*args, **kwargs)
 
 
@@ -88,7 +89,7 @@ class OpaquePass(RenderPass):
     def display_gl(self, *args, **kwargs):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthMask(True)
-        GL.glDepthFunc(GL.GL_LESS)
+        GL.glDepthFunc(GL.GL_LESS)  # First to paint at a particular depth wins
         super().display_gl(*args, **kwargs)
 
 

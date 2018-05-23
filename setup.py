@@ -15,5 +15,5 @@ setup(
     download_url='https://github.com/cmbruns/pyopenvr/tarball/' + __version__,
     license='GPL',
     packages=find_packages(),
-    install_requires=['numpy', 'PyQt5'],
+    install_requires=['numpy', 'PyQt5', 'pillow'],
 )

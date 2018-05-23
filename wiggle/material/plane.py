@@ -10,6 +10,7 @@ import numpy
 
 from wiggle.material import BaseMaterial
 from wiggle.material.shader import ShaderStage, ShaderFileBlock
+from wiggle.material.texture import Texture
 
 
 class PlaneMaterial(BaseMaterial):
@@ -27,9 +28,7 @@ class PlaneMaterial(BaseMaterial):
         super().__init__()
         self.render_mode_index = None
         self.render_mode = self.RenderMode.TEXTURE
-        img_stream = pkg_resources.resource_stream('wiggle.images', 'uv_test.png')
-        self.test_image = Image.open(img_stream, 'r')
-        self.texture_id = None
+        self.texture = Texture('wiggle.images', 'uv_test.png')
 
     def create_vertex_shader(self):
         return ShaderStage(
@@ -41,37 +40,18 @@ class PlaneMaterial(BaseMaterial):
             [ShaderFileBlock('wiggle.glsl', 'plane.frag'), ],
             GL.GL_FRAGMENT_SHADER)
 
-    def display_gl(self, camera, *args, **kwargs):
-        super().display_gl(camera, *args, **kwargs)
+    def display_gl(self, *args, **kwargs):
+        super().display_gl(*args, **kwargs)
         GL.glEnable(GL.GL_CLIP_PLANE0)
         #
         GL.glUniform1i(self.render_mode_index, self.render_mode.value)
         if self.render_mode == self.RenderMode.TEXTURE:
-            GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture_id)
+            self.texture.display_gl(*args, **kwargs)
 
     def init_gl(self):
         super().init_gl()
         print('initializing plane material')
         self.render_mode_index = GL.glGetUniformLocation(self.shader, 'render_mode')
-        # todo: move texture stuff to a texture class
-        self.texture_id = GL.glGenTextures(1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture_id)
-        GL.glTexImage2D(
-            GL.GL_TEXTURE_2D,
-            0,  # level-of-detail
-            GL.GL_RGB,  # internal format
-            self.test_image.size[0],  # width
-            self.test_image.size[1],  # height
-            0,  # border, must be zero
-            GL.GL_RGB,  # format
-            GL.GL_UNSIGNED_BYTE,  # type
-            self.test_image.tobytes('raw', 'RGB', 0, -1)
-        )
-        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
-        fLargest = GL.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)
-        GL.glTexParameterf(GL.GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest)
-        GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
 
 
 class PlaneHorizonLineMaterial(PlaneMaterial):

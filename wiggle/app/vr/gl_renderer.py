@@ -21,19 +21,20 @@ def matrixForOpenVrMatrix(mat):
                  (mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1]), 
                  (mat.m[0][2], mat.m[1][2], mat.m[2][2], mat.m[3][2]), 
                  (mat.m[0][3], mat.m[1][3], mat.m[2][3], mat.m[3][3]),)
-            , numpy.float32)
+            , numpy.float32).transpose()
     elif len(mat.m) == 3: # HmdMatrix34_t?
         result = numpy.matrix(
                 ((mat.m[0][0], mat.m[1][0], mat.m[2][0], 0.0),
                  (mat.m[0][1], mat.m[1][1], mat.m[2][1], 0.0), 
                  (mat.m[0][2], mat.m[1][2], mat.m[2][2], 0.0), 
                  (mat.m[0][3], mat.m[1][3], mat.m[2][3], 1.0),)
-            , numpy.float32)
+            , numpy.float32).transpose()
     return result
 
 
 class VrCamera(object):
     pass
+
 
 class OpenVrFramebuffer(object):
     "Framebuffer for rendering one eye"
@@ -180,12 +181,12 @@ class OpenVrGlRenderer(list):
         hmd_pose0 = self.poses[openvr.k_unTrackedDeviceIndex_Hmd]
         if not hmd_pose0.bPoseIsValid:
             return
-        hmd_pose1 = hmd_pose0.mDeviceToAbsoluteTracking # head_X_room in Kane notation
-        hmd_pose = matrixForOpenVrMatrix(hmd_pose1).I # room_X_head in Kane notation
+        hmd_pose1 = hmd_pose0.mDeviceToAbsoluteTracking  # w_from_hmd in Kane notation
+        hmd_pose = matrixForOpenVrMatrix(hmd_pose1).I  # hmd_from_w in Kane notation
         # Use the pose to compute things
-        modelview = hmd_pose
-        self.left_camera.view_matrix = modelview * self.view_left # room_X_eye(left) in Kane notation
-        self.right_camera.view_matrix = modelview * self.view_right # room_X_eye(right) in Kane notation
+        modelview = hmd_pose  # hmd_from_w
+        self.left_camera.view_matrix = self.view_left @ modelview  # eye_from_w(left) in Kane notation
+        self.right_camera.view_matrix = self.view_right @ modelview  # eye_from_w(right) in Kane notation
         # Repack the resulting matrices to have default stride, to avoid
         # problems with weird strides and OpenGL
         self.left_camera.view_matrix = numpy.asarray(numpy.matrix(self.left_camera.view_matrix, dtype=numpy.float32))

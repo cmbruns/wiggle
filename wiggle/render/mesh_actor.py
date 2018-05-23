@@ -114,13 +114,13 @@ class MeshActor(BaseActor):
         mat.display_gl(camera, *args, **kwargs)
         for name, location in mat.mvp_matrices.items():
             if name == 'projection':
-                GL.glUniformMatrix4fv(location, 1, False, camera.projection)
+                GL.glUniformMatrix4fv(location, 1, True, camera.projection)
             elif name == 'model':
-                GL.glUniformMatrix4fv(location, 1, False, self.model_matrix.matrix)
+                GL.glUniformMatrix4fv(location, 1, True, self.model_matrix.matrix)
             elif name == 'view':
-                GL.glUniformMatrix4fv(location, 1, False, camera.view_matrix)
+                GL.glUniformMatrix4fv(location, 1, True, camera.view_matrix)
             elif name == 'model_view':
-                GL.glUniformMatrix4fv(location, 1, False, (self.model_matrix @ camera.view_matrix).pack())
+                GL.glUniformMatrix4fv(location, 1, True, (self.model_matrix @ camera.view_matrix).pack())
         self.mesh_vbo.primitive = mat.primitive()
         self.mesh_vbo.display_gl(camera=camera, *args, **kwargs)
 

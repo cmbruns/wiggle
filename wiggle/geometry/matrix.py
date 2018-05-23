@@ -53,7 +53,7 @@ class Matrix3f(MatrixBase):
             ((t*x*x + c,  t*x*y - s*z, t*x*z + s*y),
              (t*x*y + s*z, t*y*y + c,  t*y*z - s*x),
              (t*x*z - s*y, t*y*z + s*x, t*z*z + c))
-        )
+        ).transpose()
 
     @classmethod
     def scale(cls, scale):
@@ -87,7 +87,7 @@ class Matrix4f(MatrixBase):
                  (0, 2.0 * z_near / (top - bottom), 0, 0),
                  (a, b, c, -1),
                  (0, 0, d, 0),)
-        )
+        ).transpose()
 
     @classmethod
     def identity(cls):
@@ -119,7 +119,7 @@ class Matrix4f(MatrixBase):
              (t*x*y + s*z, t*y*y + c,  t*y*z - s*x, 0),
              (t*x*z - s*y, t*y*z + s*x, t*z*z + c, 0),
              (0, 0, 0, 1),)
-        ).transpose()
+        )
 
     @classmethod
     def scale(cls, scale):
@@ -137,7 +137,7 @@ class Matrix4f(MatrixBase):
              (0, 1, 0, 0),
              (0, 0, 1, 0),
              (x, y, z, 1),)
-        )
+        ).transpose()
 
 
 class ModelMatrix(object):
@@ -154,7 +154,7 @@ class ModelMatrix(object):
     @property
     def matrix(self):
         if self._needs_update:
-            self._matrix = (Matrix4f.scale(self._scale) @ self._rotation @ Matrix4f.translation(*self._center)).pack()
+            self._matrix = (Matrix4f.translation(*self._center) @ self._rotation @ Matrix4f.scale(self._scale)).pack()
         return self._matrix
 
     @property

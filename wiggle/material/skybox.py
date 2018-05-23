@@ -13,7 +13,7 @@ class NothingMaterial(BaseMaterial):
 class SkyBoxMaterial(BaseMaterial):
     def __init__(self):
         super().__init__()
-        self.texture = Texture('wiggle.images', 'xerox_office.jpg', is_equirectangular=True)
+        self.texture = Texture('wiggle.images', '_0010782_stitch2.jpg', is_equirectangular=True)
 
     def create_vertex_shader(self):
         return ShaderStage(

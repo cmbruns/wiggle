@@ -7,6 +7,7 @@ from wiggle.render.base_actor import BaseActor
 from wiggle.render.base import AutoInitRenderer, VaoRenderer
 from wiggle.material.wireframe import WireframeMaterial
 from wiggle.material.normal import NormalMaterial
+from wiggle.geometry.matrix import Matrix4f
 
 
 class MeshIndexBuffer(AutoInitRenderer):
@@ -120,7 +121,7 @@ class MeshActor(BaseActor):
             elif name == 'view':
                 GL.glUniformMatrix4fv(location, 1, True, camera.view_matrix)
             elif name == 'model_view':
-                GL.glUniformMatrix4fv(location, 1, True, (self.model_matrix @ camera.view_matrix).pack())
+                GL.glUniformMatrix4fv(location, 1, True, Matrix4f(camera.view_matrix @ self.model_matrix.matrix).pack())
         self.mesh_vbo.primitive = mat.primitive()
         self.mesh_vbo.display_gl(camera=camera, *args, **kwargs)
 

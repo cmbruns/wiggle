@@ -151,6 +151,9 @@ class ModelMatrix(object):
     def __matmul__(self, rhs):
         return Matrix4f(self.matrix @ rhs)
 
+    def __len__(self):
+        return len(self.matrix)
+
     @property
     def matrix(self):
         if self._needs_update:

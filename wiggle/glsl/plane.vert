@@ -4,8 +4,9 @@
 
 // Standard 3D graphics homogeneous matrices
 layout(location = 0) uniform mat4 projection = mat4(1);
+layout(location = 1) uniform mat4 model = mat4(1);
 // model matrix is used to transform plane from Y==0,up initial orientation
-layout(location = 4) uniform mat4 model_view = mat4(1);
+layout(location = 2) uniform mat4 view = mat4(1);
 
 // Input screen-quad corners, in clip space.
 // (the plane might fill the whole screen, if you look toward it)
@@ -42,7 +43,7 @@ void main()
 
     // Compute camera location in model space
     const vec4 cam_pos_v = vec4(0, 0, 0, 1);
-    mat4 m_from_v = inverse(model_view);
+    mat4 m_from_v = inverse(view * model);
     vec3 cam_pos_m = dehomog(m_from_v * cam_pos_v);
 
     // Compute screen-quad corner location in model space
@@ -71,9 +72,9 @@ void main()
         gl_ClipDistance[0] *= -1;
 
     // World coordinates too, for parallax adjustment
-    intersection_w = model_view * intersection_m;
+    intersection_w = model * intersection_m;
 
     // Precompute intersection in clip coordinates, to simplify
     // gl_FragDepth computation
-    intersection_c = projection * intersection_w;
+    intersection_c = projection * view * intersection_w;
 }

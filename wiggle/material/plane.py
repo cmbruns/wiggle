@@ -1,10 +1,6 @@
 from enum import Enum
 
-import pkg_resources
 from OpenGL import GL
-from OpenGL.raw.GL.EXT.texture_filter_anisotropic import GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, \
-    GL_TEXTURE_MAX_ANISOTROPY_EXT
-from PIL import Image
 
 import numpy
 
@@ -23,12 +19,13 @@ class PlaneMaterial(BaseMaterial):
         TEXTURE = 1
         CHECKER = 2
         TEX_COORD = 3
+        EQUIRECTANGULAR = 4
 
     def __init__(self):
         super().__init__()
         self.render_mode_index = None
-        self.render_mode = self.RenderMode.TEXTURE
-        self.texture = Texture('wiggle.images', 'uv_test.png')
+        self.render_mode = self.RenderMode.EQUIRECTANGULAR
+        self.texture = Texture('wiggle.images', '_0010782_stitch2.jpg', is_equirectangular=True)
 
     def create_vertex_shader(self):
         return ShaderStage(
@@ -45,7 +42,7 @@ class PlaneMaterial(BaseMaterial):
         GL.glEnable(GL.GL_CLIP_PLANE0)
         #
         GL.glUniform1i(self.render_mode_index, self.render_mode.value)
-        if self.render_mode == self.RenderMode.TEXTURE:
+        if self.render_mode == self.RenderMode.TEXTURE or self.render_mode == self.RenderMode.EQUIRECTANGULAR:
             self.texture.display_gl(*args, **kwargs)
 
     def init_gl(self):

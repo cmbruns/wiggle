@@ -98,13 +98,8 @@ class ShaderStage(BaseShaderStage):
 
     def __str__(self):
         result = []
-        line_index = 0
         for b in self.blocks:
-            b.load()
-            for line in b.lines:
-                line.shader_line_index = line_index
-                result.append(str(line))
-                line_index += 1
+            result.append(str(b))
         return '\n'.join(result)
 
     def _index_blocks(self):

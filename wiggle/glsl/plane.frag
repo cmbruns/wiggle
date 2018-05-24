@@ -75,14 +75,15 @@ vec4 solid_color(vec2 tc)
     return vec4(plane_color, 1);
 }
 
-// todo: share this method with skybox
 #pragma include "wiggle/glsl/photosphere.glsl"
 
 vec4 equirect()
 {
     const vec4 theta_view_pos_w = vec4(0, 2.0, 0, 1);  // todo: generalize
-    vec4 view_dir = intersection_w - theta_view_pos_w * intersection_w.w;
-    return equirect_color(normalize(view_dir.xyz), image);
+    vec4 p = intersection_w; // avoid subtraction problem with negative w
+    if (p.w < 0) p *= -1;
+    vec3 view_dir = p.xyz - theta_view_pos_w.xyz * p.w / theta_view_pos_w.w;
+    return equirect_color(view_dir, image);
 }
 
 vec4 texture_color(vec2 tc)

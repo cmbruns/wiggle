@@ -4,7 +4,7 @@ vec4 equirect_color(vec3 dir, sampler2D image)
     const float PI = 3.1415926535897932384626433832795;
     float longitude = 0.5 * atan(-dir.x, dir.z) / PI + 0.5; // range [0-1]
     float r = length(dir.xz);
-    float latitude = atan(-dir.y, r) / PI + 0.5; // range [0-1]
+    float latitude = atan(dir.y, r) / PI + 0.5; // range [0-1]
     vec2 tex_coord = vec2(longitude, latitude);
 
     // Use explicit gradients, to preserve anisotropic filtering during mipmap lookup

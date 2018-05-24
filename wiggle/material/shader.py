@@ -35,13 +35,14 @@ class BaseShaderStage(object):
             self.handle = self.compile()
         return self.handle
 
-    def _index_one_block(self, block):
+    def index_one_block(self, block):
         file_name = block.info.full_file_name()
         if file_name not in self.index_for_block_file_name:
             index = self._next_block_index
             self._next_block_index += 1
             self.file_name_for_block_index[index] = file_name
             self.index_for_block_file_name[file_name] = index
+        return self.index_for_block_file_name[file_name]
 
     def _format_warnings(self, log):
         log = log.replace(r'\n', '\n')
@@ -99,12 +100,12 @@ class ShaderStage(BaseShaderStage):
     def __str__(self):
         result = []
         for b in self.blocks:
-            result.append(str(b))
+            result.append(b.stringify(self))
         return '\n'.join(result)
 
     def _index_blocks(self):
         for block in self.blocks:
-            self._index_one_block(block)
+            self.index_one_block(block)
 
 
 class ShaderBlockInfo(object):
@@ -122,20 +123,36 @@ class ShaderFileBlock(object):
         self.info = ShaderBlockInfo(package, file_name)
         self.lines = []
         self.is_loaded = False
+        self.file_index = 0
 
-    def __str__(self):
+    def stringify(self, index):
         result = []
-        self.load()
+        self.load(index)
         for line in self.lines:
             result.append(str(line))
         return '\n'.join(result)
 
-    def load(self):
+    def load(self, index):
         if self.is_loaded:
             return
+        self.file_index = index.index_one_block(self)
         self.lines.clear()
         line_index = 0
+        # todo: parse #pragma include here
+        include_matcher = re.compile(r'^\s*#pragma include "(\S+)".*')
         for line in pkg_resources.resource_stream(self.info.package, self.info.file_name):
+            m = include_matcher.search(line.decode())
+            if m:
+                foo = m.group(1).split('/')
+                package = '.'.join(foo[:-1])
+                file_name = foo[-1]
+                print(package, file_name)
+                inner_block = ShaderFileBlock(package, file_name)
+                inner_block.load(index)
+                self.lines.append('#line 1 %d' % inner_block.file_index)
+                for included_line in inner_block.lines:
+                    self.lines.append(included_line)
+                self.lines.append('#line %d %d' % (line_index + 1, self.file_index))
             self.lines.append(ShaderLine(line=line.decode(), block_info=self.info, block_line_index=line_index))
             line_index += 1
         self.info.line_count = len(self.lines)

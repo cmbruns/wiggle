@@ -6,17 +6,21 @@ from wiggle.geometry.mesh import CubeMesh
 from wiggle.material.normal import NormalMaterial
 from wiggle.geometry.matrix import Matrix4f
 from wiggle.render.skybox_actor import SkyBoxActor
+from wiggle.render.skysphere_actor import SkySphereActor
 
 
 def load_test_scene(renderer):
     sky_box = SkyBoxActor()
-    renderer.add_actor(sky_box)
+    # renderer.add_actor(sky_box)
     #
     plane = PlaneActor()
     plane.model_center = (0, 0, 0)
     plane.model_rotation = Matrix4f.rotation(axis=(0, 1, 0), radians=radians(0))
     plane.model_scale = 1.0
     renderer.add_actor(plane)
+    #
+    sphere = SkySphereActor()
+    renderer.add_actor(sphere)
     #
     cube = MeshActor(mesh=CubeMesh(), material=NormalMaterial())
     cube.model_center = (0, 1.2, 0)

@@ -68,24 +68,30 @@ void main()
         cross(plane_m.xyz, cross(cam_pos_m, view_dir_m)) - plane_m.w * view_dir_m,  // xyz
         dot(plane_m.xyz, view_dir_m));  // w
 
-    // Clip away everything above the horizon.
-    // (this also allows MSAA to function on the horizon, unlike discard)
-    gl_ClipDistance[0] = -intersection_m.w;
-
-    // If the camera is under the plane, look only above the horizon
-    // todo: optionally draw nothing in this case
-    if (cam_pos_m.y <= 0) {
-        if (back_face_mode == BACK_FACE_INVISIBLE)
-            gl_ClipDistance[0] = -1;
-        else
-            gl_ClipDistance[0] *= -1;
-        // todo: solid core
-    }
-
     // World coordinates too, for parallax adjustment
     intersection_w = model * intersection_m;
 
     // Precompute intersection in clip coordinates, to simplify
     // gl_FragDepth computation
     intersection_c = projection * view * intersection_w;
+    // Clip away everything above the horizon.
+    // (this also allows MSAA to function on the horizon, unlike discard)
+
+    gl_ClipDistance[0] = -intersection_m.w;
+
+    // If the camera is under the plane, look only above the horizon
+    // todo: optionally draw nothing in this case
+    if (cam_pos_m.y <= 0) {
+        if (back_face_mode == BACK_FACE_INVISIBLE)
+            gl_ClipDistance[0] = -1;  // clip everything
+        else if (back_face_mode == BACK_FACE_HOLLOW_CORE)
+            gl_ClipDistance[0] *= -1; // clip below horizon
+        else
+            gl_ClipDistance[0] = 1;  // clip nothing
+            // todo: solid core
+    }
+
+    // trim a bit extra off the horizon to eliminate aliasing
+    gl_ClipDistance[0] -= 1e-3;
+
 }

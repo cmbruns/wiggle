@@ -23,6 +23,12 @@ out vec4 intersection_w; // for computing parallax offset
 out vec4 intersection_c; // for computing gl_FragDepth
 
 
+const int BACK_FACE_INVISIBLE = 0;
+const int BACK_FACE_SOLID_CORE = 1;
+const int BACK_FACE_HOLLOW_CORE = 2;
+uniform int back_face_mode = BACK_FACE_INVISIBLE;
+
+
 vec3 dehomog(vec4 v)
 {
     return v.xyz/v.w;
@@ -68,8 +74,13 @@ void main()
 
     // If the camera is under the plane, look only above the horizon
     // todo: optionally draw nothing in this case
-    if (cam_pos_m.y < 0)
-        gl_ClipDistance[0] *= -1;
+    if (cam_pos_m.y <= 0) {
+        if (back_face_mode == BACK_FACE_INVISIBLE)
+            gl_ClipDistance[0] = -1;
+        else
+            gl_ClipDistance[0] *= -1;
+        // todo: solid core
+    }
 
     // World coordinates too, for parallax adjustment
     intersection_w = model * intersection_m;

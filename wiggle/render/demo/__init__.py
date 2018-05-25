@@ -9,6 +9,9 @@ from wiggle.render.skybox_actor import SkyBoxActor
 
 
 def load_test_scene(renderer):
+    sky_box = SkyBoxActor()
+    renderer.add_actor(sky_box)
+    #
     plane = PlaneActor()
     plane.model_center = (0, 0, 0)
     plane.model_rotation = Matrix4f.rotation(axis=(0, 1, 0), radians=radians(0))
@@ -19,6 +22,4 @@ def load_test_scene(renderer):
     cube.model_center = (0, 1.2, 0)
     cube.model_scale = 0.3
     renderer.add_actor(cube)
-    #
-    sky_box = SkyBoxActor()
-    renderer.add_actor(sky_box)
+

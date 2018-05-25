@@ -36,7 +36,7 @@ class Texture(AutoInitRenderer):
             self.image.tobytes('raw', 'RGB', 0, -1)
         )
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
-        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST)
         if self.is_equirectangular:
             GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_MIRRORED_REPEAT)
         largest_anisotropy = GL.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT)

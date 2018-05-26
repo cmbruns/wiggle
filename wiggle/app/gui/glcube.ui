@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>glcube Scene Viewer</string>
+   <string>wiggle</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -319,7 +319,7 @@
   <customwidget>
    <class>SceneCanvas</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">wiggle/app/gui/scene_canvas</header>
+   <header>wiggle/app/gui/scene_canvas</header>
   </customwidget>
  </customwidgets>
  <resources/>

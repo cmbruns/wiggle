@@ -6,9 +6,14 @@ from wiggle.material.texture import Texture
 
 
 class SkyBoxMaterial(BaseMaterial):
-    def __init__(self):
+    def __init__(self, texture=None):
         super().__init__()
-        self.texture = Texture('wiggle.images', '_0010782_stitch2.jpg', is_equirectangular=True)
+        if texture is None:
+            texture = Texture(
+                file_name='_0010782_stitch2.jpg',
+                package='wiggle.images',
+                is_equirectangular=True)
+        self.texture = texture
 
     def create_vertex_shader(self):
         return ShaderStage(

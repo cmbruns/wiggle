@@ -8,11 +8,16 @@ from wiggle.render.base import AutoInitRenderer
 
 
 class Texture(AutoInitRenderer):
-    def __init__(self, package, file_name, is_equirectangular=False):
+    def __init__(self, file_name, package=None, is_equirectangular=False):
         super().__init__()
         self.texture_id = None
         self.is_equirectangular = is_equirectangular
-        img_stream = pkg_resources.resource_stream(package, file_name)
+        if package is None:
+            # load a regular file name
+            img_stream = file_name
+        else:
+            # load a file from a python package
+            img_stream = pkg_resources.resource_stream(package, file_name)
         self.image = Image.open(img_stream, 'r')
 
     def display_gl(self, camera, *args, **kwargs):

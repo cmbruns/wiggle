@@ -12,7 +12,7 @@ class PerspectiveCamera(object):
         self.distance = 10
         self.rotation = numpy.identity(4, dtype='float32')
         # Projection
-        self.fov_y = math.radians(45.0)
+        self._fov_y = math.radians(45.0)
         self._aspect = 1.0
         self.z_near = 0.1
         self.z_far = 100.0
@@ -38,6 +38,15 @@ class PerspectiveCamera(object):
     def focus(self, xyz):
         self._view_matrix_needs_update = True
         self._focus[:] = xyz
+
+    @property
+    def fov_y(self):
+        return self._fov_y
+
+    @fov_y.setter
+    def fov_y(self, fov):
+        self._projection_needs_update = True
+        self._fov_y = fov
 
     @property
     def projection(self):

@@ -8,7 +8,10 @@ from wiggle.material.texture import Texture
 class SkySphereMaterial(BaseMaterial):
     def __init__(self):
         super().__init__()
-        self.texture = Texture('wiggle.images', 'R0010347.JPG', is_equirectangular=True)
+        self.texture = Texture(
+            package='wiggle.images',
+            file_name='R0010347.JPG',
+            is_equirectangular=True)
 
     def create_vertex_shader(self):
         return ShaderStage(

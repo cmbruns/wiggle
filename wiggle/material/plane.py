@@ -25,7 +25,10 @@ class PlaneMaterial(BaseMaterial):
         super().__init__()
         self.render_mode_index = None
         self.render_mode = self.RenderMode.EQUIRECTANGULAR
-        self.texture = Texture('wiggle.images', 'R0010347.jpg', is_equirectangular=True)
+        self.texture = Texture(
+            file_name='R0010347.jpg',
+            package='wiggle.images',
+            is_equirectangular=True)
 
     def create_vertex_shader(self):
         return ShaderStage(

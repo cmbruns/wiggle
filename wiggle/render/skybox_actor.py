@@ -6,10 +6,12 @@ from wiggle.material.nothing import NothingMaterial
 
 
 class SkyBoxActor(MeshActor):
-    def __init__(self):
+    def __init__(self, material=None):
+        if material is None:
+            material = SkyBoxMaterial()
         super().__init__(
             mesh=ScreenQuadMesh(),
-            material=SkyBoxMaterial(),
+            material=material,
             wireframe_material=NothingMaterial(),
             render_pass=wiggle.render.base.RenderPassType.SKY,
         )

@@ -68,6 +68,9 @@ class PerspectiveCamera(object):
         self.rotation = r @ self.rotation
         self._view_matrix_needs_update = True
 
+    def set_up_direction(self, axis):
+        pass  # todo:
+
     @property
     def view_matrix(self):
         if self._view_matrix_needs_update:

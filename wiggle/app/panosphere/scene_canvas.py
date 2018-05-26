@@ -47,13 +47,14 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         self.mouse_location = p1
         dx = p1.x() - p0.x()
         dy = p1.y() - p0.y()
-        scale = dx*dx + dy*dy  # want unit vector
-        if scale == 0:
+        radians_per_pixel = self.camera.fov_y / self.height()
+        dist_pixels = math.sqrt(dx*dx + dy*dy)
+        if dist_pixels == 0:
             return
-        scale = math.sqrt(1.0 / scale)
-        rotation_axis = (scale * dy, scale * dx, 0)
-        angle = 0.01 * (abs(dx) + abs(dy))
-        self.camera.rotate(rotation_axis, angle)
+        dist_radians = dist_pixels * radians_per_pixel
+        rotation_axis = (dy/dist_pixels, dx/dist_pixels, 0)
+        self.camera.rotate(rotation_axis, -dist_radians)
+        self.camera.set_up_direction = (0, 1, 0)  # todo: the goggles do nothing
         self.update()
 
     def mousePressEvent(self, event):

@@ -31,15 +31,9 @@ class MainWindow(QMainWindow):
             app_name='panosphere',
         )
 
-    def _quit(self):
-        self.save_settings()
-        QCoreApplication.quit()
-
     def _setup_ui(self):
         uic.loadUi(uifile=pkg_resources.resource_stream('wiggle.app.panosphere', 'panosphere.ui'), baseinstance=self)
         self.openGLWidget.main_window = self
-        self.actionQuit.triggered.connect(self._quit)
-        self.actionOpen.triggered.connect(self.open_file)
 
     def _setup_canvas(self):
         self.openGLWidget.camera = self.camera
@@ -47,6 +41,7 @@ class MainWindow(QMainWindow):
         self.openGLWidget.main_window = self
 
     def closeEvent(self, event):
+        print('closeEvent')
         self.save_settings()
         super().closeEvent(event)
 
@@ -62,10 +57,12 @@ class MainWindow(QMainWindow):
             file_name=file_name,
             is_equirectangular=True)
         self.renderer.add_actor(SkyBoxActor(material=SkyBoxMaterial(sky_texture)))
-        print("Oops, I don't know how to load files yet.")
         self.openGLWidget.update()
 
-    def open_file(self):
+    def on_actionOpen_triggered(self, checked=None):
+        # Avoid calling twice by responding only to the zero-argument version
+        if checked is not None:
+            return
         result = QFileDialog.getOpenFileName(
             parent=self,
             caption='Open a spherical panorama image file now',
@@ -74,7 +71,22 @@ class MainWindow(QMainWindow):
         if result is None:
             return
         file_name = result[0]
+        if len(file_name) < 1:
+            return
         self.load_file(file_name)
+
+    def on_actionQuit_triggered(self, checked=None):
+        # Avoid calling twice by responding only to the zero-argument version
+        if checked is not None:
+            return
+        self.save_settings()
+        QCoreApplication.quit()
+
+    def on_actionReset_View_triggered(self, checked=None):
+        # Avoid calling twice by responding only to the zero-argument version
+        if checked is not None:
+            return
+        self.openGLWidget.reset_view()
 
     def read_settings(self):
         settings = QSettings('Brunsgen International', 'panosphere')

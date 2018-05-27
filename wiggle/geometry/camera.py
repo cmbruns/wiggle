@@ -10,7 +10,7 @@ class PerspectiveCamera(object):
         self._focus = numpy.array([0, 0, 0], dtype='float32')
         # View matrix
         self.distance = 10
-        self.rotation = numpy.identity(4, dtype='float32')
+        self._rotation = numpy.identity(4, dtype='float32')
         # Projection
         self._fov_y = math.radians(45.0)
         self._aspect = 1.0
@@ -66,6 +66,14 @@ class PerspectiveCamera(object):
     def rotate(self, axis, angle):
         r = Matrix4f.rotation(axis, angle)
         self.rotation = r @ self.rotation
+
+    @property
+    def rotation(self):
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, rotation):
+        self._rotation[:] = rotation[:]
         self._view_matrix_needs_update = True
 
     def set_y_up(self):
@@ -78,10 +86,8 @@ class PerspectiveCamera(object):
             latitude = math.radians(90)
         if latitude < math.radians(-90):
             latitude = math.radians(-90)
-        # print(math.degrees(latitude), math.degrees(longitude), r_test[1, 1])
         r1 = Matrix4f.rotation((1, 0, 0), latitude)
         r2 = Matrix4f.rotation((0, 1, 0), -longitude)
-        # print(math.degrees(math.atan2(-r2[0, 2], r2[2, 2])))
         self.rotation = r1 @ r2
 
     @property

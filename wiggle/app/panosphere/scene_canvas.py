@@ -4,10 +4,11 @@ import pkg_resources
 import datetime
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QOpenGLWidget
+from PyQt5.QtWidgets import QOpenGLWidget, QMenu
 from PyQt5.QtGui import QCursor, QPixmap, QSurfaceFormat
 
 from wiggle.geometry.camera import PerspectiveCamera
+from wiggle.geometry.matrix import Matrix4f
 
 _log_level = logging.WARN
 logging.basicConfig(level=_log_level)
@@ -71,6 +72,14 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         self.setCursor(cross_hair_cursor)
         self.click_manager = MouseClickManager(self)
 
+    def contextMenuEvent(self, event):
+        print('context')
+        menu = QMenu(self)
+        menu.addAction('Reset View', self.reset_view)
+        menu.addSeparator()
+        menu.addAction('Close')
+        menu.exec(event.globalPos())
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
@@ -122,6 +131,11 @@ class PanosphereSceneCanvas(QOpenGLWidget):
     def paintGL(self):
         if self.renderer is not None:
             self.renderer.display_gl(camera=self.camera)
+
+    def reset_view(self):
+        self.camera.rotation = Matrix4f.identity()
+        self.camera.fov_y = math.radians(45)
+        self.update()
 
     def resizeGL(self, width, height):
         aspect = width / float(height)

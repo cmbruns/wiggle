@@ -1,9 +1,11 @@
 import logging
 import math
+import pkg_resources
+import datetime
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QOpenGLWidget
-from PyQt5.QtGui import QSurfaceFormat
+from PyQt5.QtGui import QCursor, QPixmap, QSurfaceFormat
 
 from wiggle.geometry.camera import PerspectiveCamera
 
@@ -11,6 +13,44 @@ _log_level = logging.WARN
 logging.basicConfig(level=_log_level)
 logger = logging.getLogger(__name__)
 logger.setLevel(_log_level)
+
+
+class MouseClickManager(object):
+    def __init__(self, widget):
+        self.widget = widget
+        self.pressed_time = None
+        self.previous_pressed_time = None
+        self.pressed_pos = None
+
+    def clear(self):
+        self.pressed_time = None
+        self.pressed_pos = None
+
+    def mouse_pressed(self, event):
+        self.pressed_time = datetime.datetime.now()
+        self.pressed_pos = event.pos()
+
+    def mouse_released(self, event):
+        if self.pressed_time is None:
+            return
+        released_time = datetime.datetime.now()
+        elapsed = (released_time - self.pressed_time).total_seconds()
+        if elapsed > 0.9:
+            self.clear()
+            return
+        released_pos = event.pos()
+        delta_pos = released_pos - self.pressed_pos
+        if delta_pos.manhattanLength() > 5:
+            self.clear()
+            return
+        if self.previous_pressed_time is not None:
+            # A double click is just a click
+            if (self.pressed_time - self.previous_pressed_time).total_seconds() < 0.5:
+                self.clear()
+                return
+        self.previous_pressed_time = released_time
+        self.widget.mouse_click_event(self.pressed_pos, event)
+        self.clear()
 
 
 class PanosphereSceneCanvas(QOpenGLWidget):
@@ -24,6 +64,12 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         format_.setSamples(4)
         self.setFormat(format_)
         self.setAcceptDrops(True)
+        #
+        cursor_file_name = pkg_resources.resource_filename('wiggle.images', 'cross-hair.png')
+        cursor_pixmap = QPixmap(cursor_file_name)
+        cross_hair_cursor = QCursor(cursor_pixmap, 15, 15)
+        self.setCursor(cross_hair_cursor)
+        self.click_manager = MouseClickManager(self)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -38,6 +84,9 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         super().initializeGL()
         if self.renderer is not None:
             self.renderer.init_gl()
+
+    def mouse_click_event(self, press_position, release_event):
+        print('clicked')
 
     def mouseMoveEvent(self, event):
         if not self.is_dragging:
@@ -54,19 +103,19 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         dist_radians = dist_pixels * radians_per_pixel
         rotation_axis = (dy/dist_pixels, dx/dist_pixels, 0)
         self.camera.rotate(rotation_axis, -dist_radians)
-        self.camera.set_up_direction = (0, 1, 0)  # todo: the goggles do nothing
+        self.camera.set_y_up()  # todo: the goggles do nothing
         self.update()
 
     def mousePressEvent(self, event):
         if self.is_dragging:
             return  # Who cares?
+        self.click_manager.mouse_pressed(event)
         if event.buttons() & Qt.LeftButton:
             self.is_dragging = True
             self.mouse_location = event.pos()
 
     def mouseReleaseEvent(self, event):
-        if not self.is_dragging:
-            return  # Who cares?
+        self.click_manager.mouse_released(event)
         if event.button() == Qt.LeftButton:
             self.is_dragging = False
 
@@ -90,5 +139,8 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         degrees = event.angleDelta().y() / 8.0
         zoom = 1.003 ** degrees
         # todo: zoom should change the field of view
-        self.camera.fov_y *= zoom
+        new_fov = self.camera.fov_y / zoom
+        if new_fov > math.radians(130):
+            new_fov = math.radians(130)
+        self.camera.fov_y = new_fov
         self.update()

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>594</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,8 +33,15 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionQuit"/>
+    <widget class="QMenu" name="menuRecent_Files">
+     <property name="title">
+      <string>Recent Files</string>
+     </property>
+    </widget>
     <addaction name="actionOpen"/>
+    <addaction name="menuRecent_Files"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -47,6 +54,11 @@
   <action name="actionOpen">
    <property name="text">
     <string>Open...</string>
+   </property>
+  </action>
+  <action name="actionMenu">
+   <property name="text">
+    <string>Menu</string>
    </property>
   </action>
  </widget>

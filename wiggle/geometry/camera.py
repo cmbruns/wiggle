@@ -68,8 +68,21 @@ class PerspectiveCamera(object):
         self.rotation = r @ self.rotation
         self._view_matrix_needs_update = True
 
-    def set_up_direction(self, axis):
-        pass  # todo:
+    def set_y_up(self):
+        # Keep rotation matrix near a two-angle version, with y-up-ish
+        latitude = math.atan2(self.rotation[2, 1], self.rotation[1, 1])
+        r_test = Matrix4f.rotation((1, 0, 0), -latitude)
+        r_test = r_test @ self.rotation
+        longitude = math.atan2(-r_test[0, 2], r_test[2, 2])
+        if latitude > math.radians(90):
+            latitude = math.radians(90)
+        if latitude < math.radians(-90):
+            latitude = math.radians(-90)
+        # print(math.degrees(latitude), math.degrees(longitude), r_test[1, 1])
+        r1 = Matrix4f.rotation((1, 0, 0), latitude)
+        r2 = Matrix4f.rotation((0, 1, 0), -longitude)
+        # print(math.degrees(math.atan2(-r2[0, 2], r2[2, 2])))
+        self.rotation = r1 @ r2
 
     @property
     def view_matrix(self):

@@ -10,6 +10,7 @@ from wiggle.render.renderer import Renderer
 from wiggle.material.texture import Texture
 from wiggle.material.skybox import SkyBoxMaterial
 from wiggle.render.skybox_actor import SkyBoxActor
+from wiggle.app.recent_file import RecentFileList
 
 
 class MainWindow(QMainWindow):
@@ -23,6 +24,12 @@ class MainWindow(QMainWindow):
         self.camera.distance = 2
         self.renderer = Renderer()
         self._setup_canvas()
+        self.recent_files = RecentFileList(
+            open_file_slot=self.load_file,
+            settings_key='recent_files',
+            menu=self.menuRecent_Files,
+            app_name='panosphere',
+        )
 
     def _quit(self):
         self.save_settings()
@@ -50,6 +57,7 @@ class MainWindow(QMainWindow):
 
     def load_file(self, file_name):
         print(file_name)
+        self.recent_files.add_file(file_name)
         sky_texture = Texture(
             file_name=file_name,
             is_equirectangular=True)

@@ -6,24 +6,27 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from PyQt5.QtCore import QSettings
 
 from wiggle.geometry.camera import PerspectiveCamera
-from wiggle.render.renderer import Renderer
-from wiggle.material.texture import Texture
 from wiggle.material.skybox import SkyBoxMaterial
-from wiggle.render.skybox_actor import SkyBoxActor
+from wiggle.material.texture import Texture
 from wiggle.app.recent_file import RecentFileList
+from wiggle.render.points_actor import PointsActor
+from wiggle.render.renderer import Renderer
+from wiggle.render.skybox_actor import SkyBoxActor
 
 
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
         self._setup_ui()
-        self.read_settings()
-        self.clear_settings()
         self.camera = PerspectiveCamera()
         self.camera.focus = (0, 0, 0)
         self.camera.distance = 2
+        #
         self.renderer = Renderer()
         self._setup_canvas()
+        self.points_actor = PointsActor()
+        self.renderer.add_actor(self.points_actor)
+        #
         self.recent_files = RecentFileList(
             open_file_slot=self.load_file,
             settings_key='recent_files',
@@ -33,6 +36,8 @@ class MainWindow(QMainWindow):
 
     def _setup_ui(self):
         uic.loadUi(uifile=pkg_resources.resource_stream('wiggle.app.panosphere', 'panosphere.ui'), baseinstance=self)
+        self.read_settings()
+        self.clear_settings()
         self.openGLWidget.main_window = self
 
     def _setup_canvas(self):
@@ -41,7 +46,6 @@ class MainWindow(QMainWindow):
         self.openGLWidget.main_window = self
 
     def closeEvent(self, event):
-        print('closeEvent')
         self.save_settings()
         super().closeEvent(event)
 

@@ -19,6 +19,7 @@ class Texture(AutoInitRenderer):
             # load a file from a python package
             img_stream = pkg_resources.resource_stream(package, file_name)
         self.image = Image.open(img_stream, 'r')
+        self.image = self.image.convert('RGBA')
 
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
@@ -26,19 +27,18 @@ class Texture(AutoInitRenderer):
 
     def init_gl(self):
         super().init_gl()
-        print('initializing skybox material')
         self.texture_id = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.texture_id)
         GL.glTexImage2D(
             GL.GL_TEXTURE_2D,
             0,  # level-of-detail
-            GL.GL_RGB,  # internal format
+            GL.GL_RGBA,  # internal format
             self.image.size[0],  # width
             self.image.size[1],  # height
             0,  # border, must be zero
-            GL.GL_RGB,  # format
+            GL.GL_RGBA,  # format
             GL.GL_UNSIGNED_BYTE,  # type
-            self.image.tobytes('raw', 'RGB', 0, -1)
+            self.image.tobytes('raw', 'RGBA', 0, -1)
         )
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST)

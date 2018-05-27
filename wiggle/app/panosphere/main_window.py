@@ -66,7 +66,8 @@ class MainWindow(QMainWindow):
         result = QFileDialog.getOpenFileName(
             parent=self,
             caption='Open a spherical panorama image file now',
-            filter='jpeg(*.jpg)',
+            filter='All Files (*.*);;Images (*.jpg *.ktx)',
+            initialFilter='Images (*.jpg *.ktx)',
         )
         if result is None:
             return

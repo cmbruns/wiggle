@@ -50,7 +50,6 @@ class PlaneMaterial(BaseMaterial):
 
     def init_gl(self):
         super().init_gl()
-        print('initializing plane material')
         self.render_mode_index = GL.glGetUniformLocation(self.shader, 'render_mode')
 
 

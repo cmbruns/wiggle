@@ -73,7 +73,6 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         self.click_manager = MouseClickManager(self)
 
     def contextMenuEvent(self, event):
-        print('context')
         menu = QMenu(self)
         menu.addAction('Reset View', self.reset_view)
         menu.addSeparator()
@@ -95,7 +94,7 @@ class PanosphereSceneCanvas(QOpenGLWidget):
             self.renderer.init_gl()
 
     def mouse_click_event(self, press_position, release_event):
-        print('clicked')
+        pass  # todo:
 
     def mouseMoveEvent(self, event):
         if not self.is_dragging:

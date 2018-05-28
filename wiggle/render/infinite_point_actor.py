@@ -5,11 +5,12 @@ from OpenGL.arrays import vbo
 from wiggle.material import BaseMaterial
 from wiggle.material.texture import Texture
 from wiggle.material.shader import ShaderStage, ShaderFileBlock
+from wiggle.render.base import RenderPassType
 from wiggle.render.renderer import AutoInitRenderer
 from wiggle.render.renderer import VaoRenderer
 
 
-class PointsMaterial(BaseMaterial):
+class InfinitePointMaterial(BaseMaterial):
     def __init__(self, texture=None):
         super().__init__()
         if texture is None:
@@ -21,7 +22,7 @@ class PointsMaterial(BaseMaterial):
 
     def create_vertex_shader(self):
         return ShaderStage(
-            [ShaderFileBlock('wiggle.glsl', 'positions0.vert'), ],
+            [ShaderFileBlock('wiggle.glsl', 'infinite_point.vert'), ],
             GL.GL_VERTEX_SHADER)
 
     def create_vertex_shader(self):
@@ -34,13 +35,13 @@ class PointsMaterial(BaseMaterial):
         self.texture.display_gl(camera=camera, *args, **kwargs)
 
 
-class PointsActor(AutoInitRenderer, VaoRenderer):
+class InfinitePointActor(AutoInitRenderer, VaoRenderer):
     def __init__(self):
-        super().__init__()
+        super().__init__(render_pass=RenderPassType.GROUND)
         self.points = numpy.array(((0, 0, -1), ), dtype=numpy.float32)
         self.vbo = None
         self.position_location = 0
-        self.material = PointsMaterial()
+        self.material = InfinitePointMaterial()
 
     def init_gl(self):
         super().init_gl()
@@ -52,12 +53,8 @@ class PointsActor(AutoInitRenderer, VaoRenderer):
 
     def display_gl(self, camera,  *args, **kwargs):
         super().display_gl(camera=camera, *args, **kwargs)
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-        GL.glEnable(GL.GL_BLEND)
         self.material.display_gl(camera=camera, *args, **kwargs)
         self.vbo.bind()
         GL.glEnable(GL.GL_POINT_SPRITE)
         GL.glPointSize(10)
-        # GL.glDisable(GL.GL_DEPTH_TEST)
-        # print('draw point')
         GL.glDrawArrays(GL.GL_POINTS, 0, self.points.size//3)

@@ -1,3 +1,4 @@
+from collections import deque
 import enum
 
 from OpenGL import GL
@@ -7,13 +8,14 @@ class RenderPassType(enum.Enum):
     """
     Lower numbered passes are rendered before higher numbered ones.
     """
-    SKY = 100
-    GROUND = 200
-    OPAQUE = 300
+    CLEAR = 100  # Just clears the screen
+    SKY = 200  # At infinity, no depth buffer, painter's algorithm
+    GROUND = 300  # Mixture of infinity and nearby, depth buffer + painter's algorithm
+    OPAQUE = 400  # Depth buffer, first-to-paint wins (opposite to painter's)
 
 
 class AbstractRenderable(object):
-    def __init__(self, render_pass=RenderPassType.OPAQUE):
+    def __init__(self, render_pass=RenderPassType.OPAQUE, *args, **kwargs):
         self.default_render_pass = render_pass
 
     """Contains stub methods for OpenGL rendering"""
@@ -68,8 +70,8 @@ class ParentRenderer(AbstractRenderable):
 
 class VaoRenderer(AbstractRenderable):
     """Create a default VBO"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.vao = None
 
     def init_gl(self):

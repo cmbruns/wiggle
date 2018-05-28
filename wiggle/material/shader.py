@@ -146,7 +146,6 @@ class ShaderFileBlock(object):
                 foo = m.group(1).split('/')
                 package = '.'.join(foo[:-1])
                 file_name = foo[-1]
-                print(package, file_name)
                 inner_block = ShaderFileBlock(package, file_name)
                 inner_block.load(index)
                 self.lines.append('#line 1 %d' % inner_block.file_index)

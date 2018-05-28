@@ -9,7 +9,7 @@ from wiggle.geometry.camera import PerspectiveCamera
 from wiggle.material.skybox import SkyBoxMaterial
 from wiggle.material.texture import Texture
 from wiggle.app.recent_file import RecentFileList
-from wiggle.render.points_actor import PointsActor
+from wiggle.render.infinite_point_actor import InfinitePointActor
 from wiggle.render.renderer import Renderer
 from wiggle.render.skybox_actor import SkyBoxActor
 
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         #
         self.renderer = Renderer()
         self._setup_canvas()
-        self.points_actor = PointsActor()
+        self.points_actor = InfinitePointActor()
         self.renderer.add_actor(self.points_actor)
         #
         self.recent_files = RecentFileList(
@@ -55,7 +55,6 @@ class MainWindow(QMainWindow):
         settings.setValue('windowState', None)
 
     def load_file(self, file_name):
-        print(file_name)
         self.recent_files.add_file(file_name)
         sky_texture = Texture(
             file_name=file_name,

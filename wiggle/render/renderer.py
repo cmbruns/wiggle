@@ -57,11 +57,19 @@ class RenderPass(AutoInitRenderer, ParentRenderer):
         self._is_wireframe = wireframe
 
 
+class ClearPass(RenderPass):
+    def __init__(self):
+        super().__init__(RenderPassType.CLEAR)
+        # Default sky box is solid gray
+        self.children.append(ScreenClearer())
+
+    def display_gl(self, *args, **kwargs):
+        super().display_gl(*args, **kwargs)
+
+
 class SkyPass(RenderPass):
     def __init__(self):
         super().__init__(RenderPassType.SKY)
-        # Default sky box is solid gray
-        self.children.append(ScreenClearer())
 
     def display_gl(self, *args, **kwargs):
         # The sky has no finite depth
@@ -79,6 +87,7 @@ class GroundPass(RenderPass):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthMask(True)
         GL.glDepthFunc(GL.GL_LEQUAL)  # Paint over existing background, even at infinity.
+        GL.glEnable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE)  # Blend using MSAA
         super().display_gl(*args, **kwargs)
 
 
@@ -97,21 +106,26 @@ class Renderer(AutoInitRenderer, VaoRenderer, ParentRenderer):
     """Organizes render passes and creates a default VBO"""
     def __init__(self):
         super().__init__()
+        self.clear_pass = ClearPass()
         self.sky_pass = SkyPass()
         self.ground_pass = GroundPass()
         self.opaque_pass = OpaquePass()
         self.children.clear()
-        self.children.append(self.sky_pass)
+        self.children.append(self.clear_pass)
         self._is_wireframe = False
 
-    def add_actor(self, actor):
+    def add_actor(self, actor, append=True):
         pass_switcher = {
+            RenderPassType.CLEAR: self.clear_pass,
             RenderPassType.SKY: self.sky_pass,
             RenderPassType.GROUND: self.ground_pass,
             RenderPassType.OPAQUE: self.opaque_pass,
         }
         pass_ = pass_switcher.get(actor.default_render_pass, self.opaque_pass)
-        pass_.children.append(actor)
+        if append:
+            pass_.children.append(actor)
+        else:
+            pass_.children.insert(0, actor)
         if pass_ not in self.children:
             self.children.append(pass_)
             self.children[:] = sorted(self.children[:])

@@ -39,7 +39,7 @@ class InfinitePointMaterial(BaseMaterial):
 class InfinitePointActor(BaseActor, VaoRenderer):
     def __init__(self):
         super().__init__(render_pass=RenderPassType.GROUND)
-        self.points = numpy.array(((0, 0, -1.0), ), dtype=numpy.float32)
+        self.points = numpy.array(((0, 0, -1.0), (0, 1, 0), ), dtype=numpy.float32)
         self.vbo = None
         self.position_location = 0
         self.material = InfinitePointMaterial()
@@ -65,5 +65,5 @@ class InfinitePointActor(BaseActor, VaoRenderer):
                 GL.glUniformMatrix4fv(location, 1, True, Matrix4f(camera.view_matrix @ self.model_matrix.matrix).pack())
         self.vbo.bind()
         GL.glEnable(GL.GL_POINT_SPRITE)
-        GL.glPointSize(10)
+        GL.glPointSize(13)
         GL.glDrawArrays(GL.GL_POINTS, 0, self.points.size//3)

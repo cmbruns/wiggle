@@ -4,9 +4,11 @@ import pkg_resources
 import datetime
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QOpenGLWidget, QMenu
+from PyQt5.QtWidgets import QAction, QOpenGLWidget, QMenu
 from PyQt5.QtGui import QCursor, QPixmap, QSurfaceFormat
+import numpy
 
+from wiggle.geometry import normalize
 from wiggle.geometry.camera import PerspectiveCamera
 from wiggle.geometry.matrix import Matrix4f
 
@@ -14,6 +16,18 @@ _log_level = logging.WARN
 logging.basicConfig(level=_log_level)
 logger = logging.getLogger(__name__)
 logger.setLevel(_log_level)
+
+
+class CenterOnPointAction(QAction):
+    def __init__(self, location_w, scene_canvas):
+        super().__init__()
+        self.setText('Center On This Location')
+        self.scene_canvas = scene_canvas
+        self.location_w = location_w
+        self.triggered.connect(self.center_on)
+
+    def center_on(self):
+        self.scene_canvas.center_on(self.location_w)
 
 
 class MouseClickManager(object):
@@ -71,12 +85,31 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         cross_hair_cursor = QCursor(cursor_pixmap, 15, 15)
         self.setCursor(cross_hair_cursor)
         self.click_manager = MouseClickManager(self)
+        self.setMouseTracking(True)  # Hover event
+        self.main_window = None
+
+    def center_on(self, position_w):
+        a = position_w
+        b = self._world_direction_from_screen_pixel(self.width()/2, self.height()/2)
+        # b = (0, 0, -1)  # target center position
+        rotation_axis = normalize(numpy.cross(a, b))
+        cosangle = numpy.dot(a, b)
+        cosangle = min(cosangle, 1.0)
+        cosangle = max(cosangle, -1.0)
+        rotation_angle = math.acos(cosangle)
+        rot = Matrix4f.rotation(rotation_axis, rotation_angle)
+        self.camera.rotation = self.camera.rotation @ rot
+        self.camera.set_y_up()
+        self.update()
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
+        world_pos = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
+        center_on_point_action = CenterOnPointAction(world_pos, self)
+        menu.addAction(center_on_point_action)
         menu.addAction('Reset View', self.reset_view)
         menu.addSeparator()
-        menu.addAction('Close')
+        menu.addAction('Close This Menu')
         menu.exec(event.globalPos())
 
     def dragEnterEvent(self, event):
@@ -97,22 +130,34 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         pass  # todo:
 
     def mouseMoveEvent(self, event):
-        if not self.is_dragging:
-            return
-        p1 = event.pos()
-        p0 = self.mouse_location
-        self.mouse_location = p1
-        dx = p1.x() - p0.x()
-        dy = p1.y() - p0.y()
-        radians_per_pixel = self.camera.fov_y / self.height()
-        dist_pixels = math.sqrt(dx*dx + dy*dy)
-        if dist_pixels == 0:
-            return
-        dist_radians = dist_pixels * radians_per_pixel
-        rotation_axis = (dy/dist_pixels, dx/dist_pixels, 0)
-        self.camera.rotate(rotation_axis, -dist_radians)
-        self.camera.set_y_up()  # todo: the goggles do nothing
-        self.update()
+        if self.is_dragging:
+            # Drag scene with mouse
+            p1 = event.pos()
+            p0 = self.mouse_location
+            self.mouse_location = p1
+            dx = p1.x() - p0.x()
+            dy = p1.y() - p0.y()
+            radians_per_pixel = self.camera.fov_y / self.height()
+            dist_pixels = math.sqrt(dx*dx + dy*dy)
+            if dist_pixels == 0:
+                return
+            dist_radians = dist_pixels * radians_per_pixel
+            rotation_axis = (dy/dist_pixels, dx/dist_pixels, 0)
+            self.camera.rotate(rotation_axis, -dist_radians)
+            self.camera.set_y_up()
+            self.update()
+        else:
+            # Hover to show mouse location
+            p_world = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
+            self.main_window.statusbar.showMessage('x=%+4.2f, y=%+4.2f, z=%+4.2f' % (p_world[0], p_world[1], p_world[2]))
+
+    def _world_direction_from_screen_pixel(self, x, y):
+        p_ndc = (2 * x / self.width() - 1, -2 * y / self.height() + 1)
+        p_view = numpy.linalg.inv(self.camera.projection) @ (p_ndc[0], p_ndc[1], 0.5, 1.0)
+        p_view = normalize(p_view[:3])
+        # todo: rotation
+        p_world = numpy.linalg.inv(self.camera.view_matrix) @ (p_view[0], p_view[1], p_view[2], 0)
+        return p_world[:3]
 
     def mousePressEvent(self, event):
         if self.is_dragging:

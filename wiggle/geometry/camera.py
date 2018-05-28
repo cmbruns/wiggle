@@ -2,6 +2,7 @@ import math
 
 import numpy
 
+from wiggle.geometry import normalize
 from wiggle.geometry.matrix import Matrix4f
 
 
@@ -77,18 +78,19 @@ class PerspectiveCamera(object):
         self._view_matrix_needs_update = True
 
     def set_y_up(self):
-        # Keep rotation matrix near a two-angle version, with y-up-ish
-        latitude = math.atan2(self.rotation[2, 1], self.rotation[1, 1])
-        r_test = Matrix4f.rotation((1, 0, 0), -latitude)
-        r_test = r_test @ self.rotation
-        longitude = math.atan2(-r_test[0, 2], r_test[2, 2])
-        if latitude > math.radians(90):
-            latitude = math.radians(90)
-        if latitude < math.radians(-90):
-            latitude = math.radians(-90)
-        r1 = Matrix4f.rotation((1, 0, 0), latitude)
-        r2 = Matrix4f.rotation((0, 1, 0), -longitude)
-        self.rotation = r1 @ r2
+        yy = self.rotation[1, 1]
+        if yy < 0:
+            # 1) Keep y axis above center
+            axis = normalize(numpy.cross((0, 1, 0), self.rotation[:3, 1]))
+            angle = math.asin(yy) * 1.00001
+            rot1 = Matrix4f.rotation(axis, angle)
+            self.rotation = rot1 @ self.rotation
+        else:
+            # 2) Rotate about center of view
+            yx = self.rotation[0, 1]
+            angle = math.atan2(yx, yy)
+            rot = Matrix4f.rotation((0, 0, 1), angle)
+            self.rotation = rot @ self.rotation
 
     @property
     def view_matrix(self):

@@ -40,13 +40,16 @@ class InfinitePointActor(BaseActor, VaoRenderer):
     def __init__(self):
         super().__init__(render_pass=RenderPassType.GROUND)
         self.points = numpy.array(((0, 0, -1.0), (0, 1, 0), ), dtype=numpy.float32)
-        self.vbo = None
+        self.vbo = vbo.VBO(self.points)
         self.position_location = 0
         self.material = InfinitePointMaterial()
 
+    def add_point(self, x, y, z):
+        self.points = numpy.append(arr=self.points, values=numpy.array(((x, y, z),), dtype=numpy.float32), axis=0)
+        self.vbo.set_array(self.points)
+
     def init_gl(self):
         super().init_gl()
-        self.vbo = vbo.VBO(self.points)
         GL.glEnableVertexAttribArray(self.position_location)
         self.vbo.bind()
         GL.glVertexAttribPointer(self.position_location, 3, GL.GL_FLOAT, False, 0, self.vbo)

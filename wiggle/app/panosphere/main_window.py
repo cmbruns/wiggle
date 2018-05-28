@@ -2,8 +2,9 @@ import pkg_resources
 
 from PyQt5 import uic
 from PyQt5.Qt import QCoreApplication
+from PyQt5.QtCore import QMimeData, QSettings, Qt, QPoint
+from PyQt5.QtGui import QDrag, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
-from PyQt5.QtCore import QSettings
 
 from wiggle.geometry.camera import PerspectiveCamera
 from wiggle.material.skybox import SkyBoxMaterial
@@ -25,6 +26,7 @@ class MainWindow(QMainWindow):
         self.renderer = Renderer()
         self._setup_canvas()
         self.points_actor = InfinitePointActor()
+        self.points_actor.add_point(1, 0, 0)
         self.renderer.add_actor(self.points_actor)
         #
         self.recent_files = RecentFileList(
@@ -91,6 +93,17 @@ class MainWindow(QMainWindow):
         if checked is not None:
             return
         self.openGLWidget.reset_view()
+
+    def on_verticalLineButton_pressed(self):
+        mime_data = QMimeData()
+        mime_data.setData('application/x-vertical-line', b'vertical line')
+        mime_data.setText(self.verticalLineButton.text())
+        drag = QDrag(self.verticalLineButton)
+        drag.setMimeData(mime_data)
+        pixmap = QPixmap(pkg_resources.resource_filename('wiggle.app.panosphere.images', 'VerticalLine32.png'))
+        drag.setHotSpot(QPoint(16, 16))
+        drag.setPixmap(pixmap)
+        drag.exec(Qt.CopyAction)
 
     def read_settings(self):
         settings = QSettings('Brunsgen International', 'panosphere')

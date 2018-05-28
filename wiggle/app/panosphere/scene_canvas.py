@@ -113,10 +113,19 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         menu.exec(event.globalPos())
 
     def dragEnterEvent(self, event):
+        md = event.mimeData()
+        if md.hasFormat('application/x-vertical-line'):
+            # print('vertical line drag')
+            event.acceptProposedAction()
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
 
     def dropEvent(self, event):
+        if event.mimeData().hasFormat('application/x-vertical-line'):
+            pos = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
+            print(pos)
+            self.main_window.points_actor.add_point(*pos)
+            self.update()
         for url in event.mimeData().urls():
             file_name = url.toLocalFile()
             self.main_window.load_file(file_name)

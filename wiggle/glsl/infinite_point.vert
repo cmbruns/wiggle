@@ -7,5 +7,6 @@ layout(location = 4) uniform mat4 model_view = mat4(1);
 
 void main()
 {
-  gl_Position = projection * model_view * vec4(inPosition, 1.0);
+    vec4 rot_only = model_view * vec4(inPosition, 0.0);
+    gl_Position = projection * vec4(rot_only.xyz, 1.0);
 }

@@ -2,11 +2,12 @@ import numpy
 from OpenGL import GL
 from OpenGL.arrays import vbo
 
+from wiggle.geometry.matrix import Matrix4f
 from wiggle.material import BaseMaterial
 from wiggle.material.texture import Texture
 from wiggle.material.shader import ShaderStage, ShaderFileBlock
 from wiggle.render.base import RenderPassType
-from wiggle.render.renderer import AutoInitRenderer
+from wiggle.render.base_actor import BaseActor
 from wiggle.render.renderer import VaoRenderer
 
 
@@ -25,7 +26,7 @@ class InfinitePointMaterial(BaseMaterial):
             [ShaderFileBlock('wiggle.glsl', 'infinite_point.vert'), ],
             GL.GL_VERTEX_SHADER)
 
-    def create_vertex_shader(self):
+    def create_fragment_shader(self):
         return ShaderStage(
             [ShaderFileBlock('wiggle.glsl', 'point_texture.frag'), ],
             GL.GL_FRAGMENT_SHADER)
@@ -35,17 +36,16 @@ class InfinitePointMaterial(BaseMaterial):
         self.texture.display_gl(camera=camera, *args, **kwargs)
 
 
-class InfinitePointActor(AutoInitRenderer, VaoRenderer):
+class InfinitePointActor(BaseActor, VaoRenderer):
     def __init__(self):
         super().__init__(render_pass=RenderPassType.GROUND)
-        self.points = numpy.array(((0, 0, -1), ), dtype=numpy.float32)
+        self.points = numpy.array(((0, 0, -1.0), ), dtype=numpy.float32)
         self.vbo = None
         self.position_location = 0
         self.material = InfinitePointMaterial()
 
     def init_gl(self):
         super().init_gl()
-        self.material.init_gl()
         self.vbo = vbo.VBO(self.points)
         GL.glEnableVertexAttribArray(self.position_location)
         self.vbo.bind()
@@ -54,6 +54,15 @@ class InfinitePointActor(AutoInitRenderer, VaoRenderer):
     def display_gl(self, camera,  *args, **kwargs):
         super().display_gl(camera=camera, *args, **kwargs)
         self.material.display_gl(camera=camera, *args, **kwargs)
+        for name, location in self.material.mvp_matrices.items():
+            if name == 'projection':
+                GL.glUniformMatrix4fv(location, 1, True, camera.projection)
+            elif name == 'model':
+                GL.glUniformMatrix4fv(location, 1, True, self.model_matrix.matrix)
+            elif name == 'view':
+                GL.glUniformMatrix4fv(location, 1, True, camera.view_matrix)
+            elif name == 'model_view':
+                GL.glUniformMatrix4fv(location, 1, True, Matrix4f(camera.view_matrix @ self.model_matrix.matrix).pack())
         self.vbo.bind()
         GL.glEnable(GL.GL_POINT_SPRITE)
         GL.glPointSize(10)

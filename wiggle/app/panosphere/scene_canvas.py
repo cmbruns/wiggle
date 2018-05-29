@@ -30,44 +30,6 @@ class CenterOnPointAction(QAction):
         self.scene_canvas.center_on(self.location_w)
 
 
-class MouseClickManager(object):
-    def __init__(self, widget):
-        self.widget = widget
-        self.pressed_time = None
-        self.previous_pressed_time = None
-        self.pressed_pos = None
-
-    def clear(self):
-        self.pressed_time = None
-        self.pressed_pos = None
-
-    def mouse_pressed(self, event):
-        self.pressed_time = datetime.datetime.now()
-        self.pressed_pos = event.pos()
-
-    def mouse_released(self, event):
-        if self.pressed_time is None:
-            return
-        released_time = datetime.datetime.now()
-        elapsed = (released_time - self.pressed_time).total_seconds()
-        if elapsed > 0.9:
-            self.clear()
-            return
-        released_pos = event.pos()
-        delta_pos = released_pos - self.pressed_pos
-        if delta_pos.manhattanLength() > 5:
-            self.clear()
-            return
-        if self.previous_pressed_time is not None:
-            # A double click is just a click
-            if (self.pressed_time - self.previous_pressed_time).total_seconds() < 0.5:
-                self.clear()
-                return
-        self.previous_pressed_time = released_time
-        self.widget.mouse_click_event(self.pressed_pos, event)
-        self.clear()
-
-
 class PanosphereSceneCanvas(QOpenGLWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,7 +46,6 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         cursor_pixmap = QPixmap(cursor_file_name)
         cross_hair_cursor = QCursor(cursor_pixmap, 15, 15)
         self.setCursor(cross_hair_cursor)
-        self.click_manager = MouseClickManager(self)
         self.setMouseTracking(True)  # Hover event
         self.main_window = None
 
@@ -123,8 +84,11 @@ class PanosphereSceneCanvas(QOpenGLWidget):
     def dropEvent(self, event):
         if event.mimeData().hasFormat('application/x-vertical-line'):
             pos = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
-            print(pos)
-            self.main_window.points_actor.add_point(*pos)
+            dy = 0.1 * self.camera.fov_y
+            upper_spot = normalize(pos + (0, dy, 0))
+            lower_spot = normalize(pos - (0, dy, 0))
+            self.main_window.points_actor.add_point(*upper_spot)
+            self.main_window.points_actor.add_point(*lower_spot)
             self.update()
         for url in event.mimeData().urls():
             file_name = url.toLocalFile()
@@ -134,9 +98,6 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         super().initializeGL()
         if self.renderer is not None:
             self.renderer.init_gl()
-
-    def mouse_click_event(self, press_position, release_event):
-        pass  # todo:
 
     def mouseMoveEvent(self, event):
         if self.is_dragging:
@@ -171,13 +132,11 @@ class PanosphereSceneCanvas(QOpenGLWidget):
     def mousePressEvent(self, event):
         if self.is_dragging:
             return  # Who cares?
-        self.click_manager.mouse_pressed(event)
         if event.buttons() & Qt.LeftButton:
             self.is_dragging = True
             self.mouse_location = event.pos()
 
     def mouseReleaseEvent(self, event):
-        self.click_manager.mouse_released(event)
         if event.button() == Qt.LeftButton:
             self.is_dragging = False
 

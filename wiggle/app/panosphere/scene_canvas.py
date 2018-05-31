@@ -11,6 +11,7 @@ import numpy
 from wiggle.geometry import normalize
 from wiggle.geometry.camera import PerspectiveCamera
 from wiggle.geometry.matrix import Matrix4f
+from wiggle.render.infinite_point_actor import InfinitePointActor
 
 _log_level = logging.WARN
 logging.basicConfig(level=_log_level)
@@ -48,6 +49,8 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         self.setCursor(cross_hair_cursor)
         self.setMouseTracking(True)  # Hover event
         self.main_window = None
+        self.hover_actor = None
+        self.has_hover_effect = False
 
     def center_on(self, position_w):
         a = position_w
@@ -121,8 +124,24 @@ class PanosphereSceneCanvas(QOpenGLWidget):
             self.main_window.statusbar.showMessage('x=%+4.2f, y=%+4.2f, z=%+4.2f' % (p_world[0], p_world[1], p_world[2]))
             tol = 8 * self.camera.fov_y / self.height()
             close_point = self.main_window.panosphere.point_near(*p_world, tol)
-            if close_point is not None:
-                print(close_point)
+            if close_point is None:
+                # unhover
+                if self.hover_actor is not None:
+                    self.hover_actor.is_visible = False
+                    if self.has_hover_effect:
+                        self.has_hover_effect = False
+                        self.update()
+            else:
+                # hover to enlarge point
+                if self.hover_actor is None:
+                    self.hover_actor = InfinitePointActor()
+                    self.hover_actor.point_size = 20
+                    self.hover_actor.color = (1, 1, 0.5)
+                    self.renderer.add_actor(self.hover_actor)
+                self.hover_actor.set_only_point(*close_point)
+                self.hover_actor.is_visible = True
+                self.has_hover_effect = True
+                self.update()
 
     def _world_direction_from_screen_pixel(self, x, y):
         p_ndc = (2 * x / self.width() - 1, -2 * y / self.height() + 1)

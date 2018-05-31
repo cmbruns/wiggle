@@ -8,8 +8,11 @@ class BaseActor(AutoInitRenderer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_matrix = ModelMatrix()
+        self.is_visible = True
 
     def display_gl(self, camera, *args, **kwargs):
+        if not self.is_visible:
+            return
         super().display_gl(camera, *args, **kwargs)
 
     def dispose_gl(self):

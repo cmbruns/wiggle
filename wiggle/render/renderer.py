@@ -75,6 +75,7 @@ class SkyPass(RenderPass):
         # The sky has no finite depth
         GL.glDisable(GL.GL_DEPTH_TEST)  # Last to paint anywhere wins
         GL.glDepthMask(False)
+        GL.glEnable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE)  # Blend using MSAA
         super().display_gl(*args, **kwargs)
 
 
@@ -87,7 +88,6 @@ class GroundPass(RenderPass):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthMask(True)
         GL.glDepthFunc(GL.GL_LEQUAL)  # Paint over existing background, even at infinity.
-        GL.glEnable(GL.GL_SAMPLE_ALPHA_TO_COVERAGE)  # Blend using MSAA
         super().display_gl(*args, **kwargs)
 
 

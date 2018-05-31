@@ -6,13 +6,10 @@ from PyQt5.QtCore import QMimeData, QSettings, Qt, QPoint
 from PyQt5.QtGui import QDrag, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
+from wiggle.app.panosphere.panosphere import Panosphere
 from wiggle.geometry.camera import PerspectiveCamera
-from wiggle.material.skybox import SkyBoxMaterial
-from wiggle.material.texture import Texture
 from wiggle.app.recent_file import RecentFileList
-from wiggle.render.infinite_point_actor import InfinitePointActor
 from wiggle.render.renderer import Renderer
-from wiggle.render.skybox_actor import SkyBoxActor
 
 
 class MainWindow(QMainWindow):
@@ -25,9 +22,8 @@ class MainWindow(QMainWindow):
         #
         self.renderer = Renderer()
         self._setup_canvas()
-        self.points_actor = InfinitePointActor()
-        self.points_actor.add_point(1, 0, 0)
-        self.renderer.add_actor(self.points_actor)
+        self.panosphere = Panosphere()
+        self.renderer.add_actor(self.panosphere.actor)
         #
         self.recent_files = RecentFileList(
             open_file_slot=self.load_file,
@@ -58,10 +54,7 @@ class MainWindow(QMainWindow):
 
     def load_file(self, file_name):
         self.recent_files.add_file(file_name)
-        sky_texture = Texture(
-            file_name=file_name,
-            is_equirectangular=True)
-        self.renderer.add_actor(SkyBoxActor(material=SkyBoxMaterial(sky_texture)))
+        self.panosphere.add_image(file_name)
         self.openGLWidget.update()
 
     def on_actionOpen_triggered(self, checked=None):

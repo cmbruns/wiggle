@@ -87,8 +87,7 @@ class PanosphereSceneCanvas(QOpenGLWidget):
             dy = 0.1 * self.camera.fov_y
             upper_spot = normalize(pos + (0, dy, 0))
             lower_spot = normalize(pos - (0, dy, 0))
-            self.main_window.points_actor.add_point(*upper_spot)
-            self.main_window.points_actor.add_point(*lower_spot)
+            self.main_window.panosphere.add_vertical_line(upper_spot, lower_spot)
             self.update()
         for url in event.mimeData().urls():
             file_name = url.toLocalFile()
@@ -120,6 +119,10 @@ class PanosphereSceneCanvas(QOpenGLWidget):
             # Hover to show mouse location
             p_world = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
             self.main_window.statusbar.showMessage('x=%+4.2f, y=%+4.2f, z=%+4.2f' % (p_world[0], p_world[1], p_world[2]))
+            tol = 8 * self.camera.fov_y / self.height()
+            close_point = self.main_window.panosphere.point_near(*p_world, tol)
+            if close_point is not None:
+                print(close_point)
 
     def _world_direction_from_screen_pixel(self, x, y):
         p_ndc = (2 * x / self.width() - 1, -2 * y / self.height() + 1)

@@ -88,7 +88,7 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         if event.mimeData().hasFormat('application/x-vertical-line'):
             pos = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
             dy = 0.1 * self.camera.fov_y
-            upper_spot = normalize(Vec3(*(pos + (0, dy, 0))))
+            upper_spot = normalize(Vec3(*pos))
             lower_spot = normalize(Vec3(*(pos - (0, dy, 0))))
             self.main_window.panosphere.add_vertical_line(upper_spot, lower_spot)
             self.update()
@@ -135,8 +135,6 @@ class PanosphereSceneCanvas(QOpenGLWidget):
                 # hover to enlarge point
                 if self.hover_actor is None:
                     self.hover_actor = InfinitePointActor()
-                    self.hover_actor.point_size = 20
-                    self.hover_actor.color = (1, 1, 0.5)
                     self.renderer.add_actor(self.hover_actor)
                 self.hover_actor.set_only_point(*close_point)
                 self.hover_actor.is_visible = True

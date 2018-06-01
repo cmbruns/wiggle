@@ -4,7 +4,7 @@ from wiggle.material.skybox import SkyBoxMaterial
 from wiggle.material.texture import Texture
 from wiggle.render.base import RenderPassType
 from wiggle.render.base_actor import BaseActor
-from wiggle.render.infinite_point_actor import InfinitePointActor
+from wiggle.render.infinite_point_actor import InfinitePointActor, PointStyle
 from wiggle.render.skybox_actor import SkyBoxActor
 
 
@@ -30,6 +30,8 @@ class PanoActor(BaseActor):
 class PanoPoint(object):
     def __init__(self, x, y, z):
         self.direction = normalize(Vec3(x, y, z), )
+        self.is_adjusted = False
+        self.is_hovered = False
 
     # Sequence operations
 
@@ -47,6 +49,14 @@ class PanoPoint(object):
     def __mul__(self, rhs):
         return self.direction * rhs
 
+    @property
+    def style(self):
+        if self.is_hovered:
+            return PointStyle.HOVERED
+        if self.is_adjusted:
+            return PointStyle.ADJUSTED
+        return PointStyle.BASIC
+
 
 class Panosphere(object):
     def __init__(self):
@@ -59,12 +69,13 @@ class Panosphere(object):
 
     def add_vertical_line(self, point1, point2):
         p1 = PanoPoint(*point1)
+        p1.is_adjusted = True
         p2 = PanoPoint(*point2)
         self._vertical_lines.append(VerticalLine(p1, p2))
         self._points.append(p1)
         self._points.append(p2)
-        self.actor.points_actor.add_point(*point1)
-        self.actor.points_actor.add_point(*point2)
+        self.actor.points_actor.add_point(*p1, style=p1.style)
+        self.actor.points_actor.add_point(*p2, style=p2.style)
 
     def point_near(self, x, y, z, tolerance):
         # todo: use a more sophisticated spatial index

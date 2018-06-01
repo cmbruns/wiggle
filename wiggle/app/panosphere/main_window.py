@@ -94,7 +94,7 @@ class MainWindow(QMainWindow):
         drag = QDrag(self.verticalLineButton)
         drag.setMimeData(mime_data)
         pixmap = QPixmap(pkg_resources.resource_filename('wiggle.app.panosphere.images', 'VerticalLine32.png'))
-        drag.setHotSpot(QPoint(16, 16))
+        drag.setHotSpot(QPoint(16, 4))
         drag.setPixmap(pixmap)
         drag.exec(Qt.CopyAction)
 

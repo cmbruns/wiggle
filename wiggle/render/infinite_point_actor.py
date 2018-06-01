@@ -1,3 +1,5 @@
+from enum import Enum
+
 import numpy
 from OpenGL import GL
 from OpenGL.arrays import vbo
@@ -11,6 +13,12 @@ from wiggle.render.base_actor import BaseActor
 from wiggle.render.renderer import VaoRenderer
 
 
+class PointStyle(Enum):
+    BASIC = 1
+    ADJUSTED = 2
+    HOVERED = 3
+
+
 class InfinitePointMaterial(BaseMaterial):
     def __init__(self, texture=None):
         super().__init__()
@@ -20,8 +28,6 @@ class InfinitePointMaterial(BaseMaterial):
                 package='wiggle.app.panosphere.images',
                 is_equirectangular=False)
         self.texture = texture
-        self.color = numpy.array((0.8, 0.8, 0.8), dtype=numpy.float32)
-        self.color_location = None
 
     def create_vertex_shader(self):
         return ShaderStage(
@@ -33,13 +39,8 @@ class InfinitePointMaterial(BaseMaterial):
             [ShaderFileBlock('wiggle.glsl', 'point_texture.frag'), ],
             GL.GL_FRAGMENT_SHADER)
 
-    def init_gl(self):
-        super().init_gl()
-        self.color_location = GL.glGetUniformLocation(self.shader, 'color')
-
     def display_gl(self, camera, *args, **kwargs):
         super().display_gl(camera, *args, **kwargs)
-        GL.glUniform3f(self.color_location, *self.color)
         self.texture.display_gl(camera=camera, *args, **kwargs)
 
 
@@ -47,30 +48,21 @@ class InfinitePointActor(BaseActor, VaoRenderer):
     def __init__(self):
         super().__init__(render_pass=RenderPassType.GROUND)
         self.points = [(0, 0, -1.0), ]
-        self.styles = [1, ]
+        self.styles = [PointStyle.BASIC.value, ]
         self.vbo = vbo.VBO(numpy.array(self.points, dtype=numpy.float32))
-        self.vbo_styles = vbo.VBO(numpy.array(self.styles, dtype=numpy.int32))
+        self.vbo_styles = vbo.VBO(numpy.array(self.styles, dtype=numpy.uint8))
         self.position_location = 0
-        self.style_location = 1
+        self.style_location = 2
         self.material = InfinitePointMaterial()
-        self.point_size = 13
 
-    def add_point(self, x, y, z, style=1):
+    def add_point(self, x, y, z, style=PointStyle.BASIC):
         self.points = numpy.append(arr=self.points, values=numpy.array(((x, y, z),), dtype=numpy.float32), axis=0)
-        self.styles.append(style)
+        self.styles.append(style.value)
         self.update_points()
 
     def update_points(self):
         self.vbo.set_array(numpy.array(self.points, dtype=numpy.float32))
-        self.vbo_styles.set_array(numpy.array(self.styles, dtype=numpy.int32))
-
-    @property
-    def color(self):
-        return self.material.color
-
-    @color.setter
-    def color(self, rgb):
-        self.material.color = numpy.array(rgb, dtype=numpy.float32)
+        self.vbo_styles.set_array(numpy.array(self.styles, dtype=numpy.uint8))
 
     def set_only_point(self, x, y, z):
         self.points = numpy.array(((x, y, z), ), dtype=numpy.float32)
@@ -81,9 +73,9 @@ class InfinitePointActor(BaseActor, VaoRenderer):
         GL.glEnableVertexAttribArray(self.position_location)
         self.vbo.bind()
         GL.glVertexAttribPointer(self.position_location, 3, GL.GL_FLOAT, False, 0, self.vbo)
-        GL.glEnableVertexAttribArray(self.style_location)
         self.vbo_styles.bind()
-        GL.glVertexAttribPointer(self.style_location, 1, GL.GL_INT, False, 0, self.vbo_styles)
+        GL.glEnableVertexAttribArray(self.style_location)
+        GL.glVertexAttribIPointer(self.style_location, 1, GL.GL_UNSIGNED_BYTE, 0, self.vbo_styles)
 
     def display_gl(self, camera,  *args, **kwargs):
         if not self.is_visible:
@@ -102,5 +94,5 @@ class InfinitePointActor(BaseActor, VaoRenderer):
         self.vbo.bind()
         self.vbo_styles.bind()
         GL.glEnable(GL.GL_POINT_SPRITE)
-        GL.glPointSize(self.point_size)
+        GL.glEnable(GL.GL_VERTEX_PROGRAM_POINT_SIZE)
         GL.glDrawArrays(GL.GL_POINTS, 0, self.points.size//3)

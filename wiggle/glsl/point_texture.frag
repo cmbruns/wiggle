@@ -1,5 +1,11 @@
 #version 430
 
+const int STYLE_BASIC_POINT = 1;
+const int STYLE_ADJUSTED_POINT = 2;
+const int STYLE_HOVERED_POINT = 3;
+
+in int style;
+
 uniform sampler2D image;
 uniform vec3 color = vec3(1);
 

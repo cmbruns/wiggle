@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QAction, QOpenGLWidget, QMenu
 from PyQt5.QtGui import QCursor, QPixmap, QSurfaceFormat
 import numpy
 
-from wiggle.geometry import normalize
+from wiggle.geometry import normalize, Vec3
 from wiggle.geometry.camera import PerspectiveCamera
 from wiggle.geometry.matrix import Matrix4f
 from wiggle.render.infinite_point_actor import InfinitePointActor
@@ -88,8 +88,8 @@ class PanosphereSceneCanvas(QOpenGLWidget):
         if event.mimeData().hasFormat('application/x-vertical-line'):
             pos = self._world_direction_from_screen_pixel(event.pos().x(), event.pos().y())
             dy = 0.1 * self.camera.fov_y
-            upper_spot = normalize(pos + (0, dy, 0))
-            lower_spot = normalize(pos - (0, dy, 0))
+            upper_spot = normalize(Vec3(*(pos + (0, dy, 0))))
+            lower_spot = normalize(Vec3(*(pos - (0, dy, 0))))
             self.main_window.panosphere.add_vertical_line(upper_spot, lower_spot)
             self.update()
         for url in event.mimeData().urls():
@@ -146,7 +146,7 @@ class PanosphereSceneCanvas(QOpenGLWidget):
     def _world_direction_from_screen_pixel(self, x, y):
         p_ndc = (2 * x / self.width() - 1, -2 * y / self.height() + 1)
         p_view = numpy.linalg.inv(self.camera.projection) @ (p_ndc[0], p_ndc[1], 0.5, 1.0)
-        p_view = normalize(p_view[:3])
+        p_view = normalize(Vec3(*p_view[:3]))
         # todo: rotation
         p_world = numpy.linalg.inv(self.camera.view_matrix) @ (p_view[0], p_view[1], p_view[2], 0)
         return p_world[:3]

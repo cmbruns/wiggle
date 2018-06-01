@@ -1,3 +1,5 @@
+from wiggle.geometry import normalize
+from wiggle.geometry import Vec3
 from wiggle.material.skybox import SkyBoxMaterial
 from wiggle.material.texture import Texture
 from wiggle.render.base import RenderPassType
@@ -25,8 +27,30 @@ class PanoActor(BaseActor):
         self.points_actor.display_gl(*args, **kwargs)
 
 
+class PanoPoint(object):
+    def __init__(self, x, y, z):
+        self.direction = normalize(Vec3(x, y, z), )
+
+    # Sequence operations
+
+    def __getitem__(self, key):
+        return self.direction[key]
+
+    def __len__(self):
+        return len(self.direction)
+
+    # Arithmetic operations
+
+    def __sub__(self, rhs):
+        return self.direction - rhs
+
+    def __mul__(self, rhs):
+        return self.direction * rhs
+
+
 class Panosphere(object):
     def __init__(self):
+        self._points = []
         self._vertical_lines = []
         self.actor = PanoActor()
 
@@ -34,7 +58,11 @@ class Panosphere(object):
         self.actor.add_image(file_name)
 
     def add_vertical_line(self, point1, point2):
-        self._vertical_lines.append(VerticalLine(point1, point2))
+        p1 = PanoPoint(*point1)
+        p2 = PanoPoint(*point2)
+        self._vertical_lines.append(VerticalLine(p1, p2))
+        self._points.append(p1)
+        self._points.append(p2)
         self.actor.points_actor.add_point(*point1)
         self.actor.points_actor.add_point(*point2)
 
@@ -43,7 +71,7 @@ class Panosphere(object):
         d2_max = tolerance * tolerance
         d2_min = None
         best_point = None
-        for p in self.actor.points_actor.points:
+        for p in self._points:
             dv = p - (x, y, z)
             test2 = dv.dot(dv)
             if test2 > d2_max:
@@ -61,3 +89,5 @@ class Panosphere(object):
 class VerticalLine(object):
     def __init__(self, point1, point2):
         self.points = [point1, point2]
+
+

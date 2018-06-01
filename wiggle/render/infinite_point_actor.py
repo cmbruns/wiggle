@@ -46,15 +46,23 @@ class InfinitePointMaterial(BaseMaterial):
 class InfinitePointActor(BaseActor, VaoRenderer):
     def __init__(self):
         super().__init__(render_pass=RenderPassType.GROUND)
-        self.points = numpy.array(((0, 0, -1.0), (0, 1, 0), ), dtype=numpy.float32)
-        self.vbo = vbo.VBO(self.points)
+        self.points = [(0, 0, -1.0), ]
+        self.styles = [1, ]
+        self.vbo = vbo.VBO(numpy.array(self.points, dtype=numpy.float32))
+        self.vbo_styles = vbo.VBO(numpy.array(self.styles, dtype=numpy.int32))
         self.position_location = 0
+        self.style_location = 1
         self.material = InfinitePointMaterial()
         self.point_size = 13
 
-    def add_point(self, x, y, z):
+    def add_point(self, x, y, z, style=1):
         self.points = numpy.append(arr=self.points, values=numpy.array(((x, y, z),), dtype=numpy.float32), axis=0)
-        self.vbo.set_array(self.points)
+        self.styles.append(style)
+        self.update_points()
+
+    def update_points(self):
+        self.vbo.set_array(numpy.array(self.points, dtype=numpy.float32))
+        self.vbo_styles.set_array(numpy.array(self.styles, dtype=numpy.int32))
 
     @property
     def color(self):
@@ -73,6 +81,9 @@ class InfinitePointActor(BaseActor, VaoRenderer):
         GL.glEnableVertexAttribArray(self.position_location)
         self.vbo.bind()
         GL.glVertexAttribPointer(self.position_location, 3, GL.GL_FLOAT, False, 0, self.vbo)
+        GL.glEnableVertexAttribArray(self.style_location)
+        self.vbo_styles.bind()
+        GL.glVertexAttribPointer(self.style_location, 1, GL.GL_INT, False, 0, self.vbo_styles)
 
     def display_gl(self, camera,  *args, **kwargs):
         if not self.is_visible:
@@ -89,6 +100,7 @@ class InfinitePointActor(BaseActor, VaoRenderer):
             elif name == 'model_view':
                 GL.glUniformMatrix4fv(location, 1, True, Matrix4f(camera.view_matrix @ self.model_matrix.matrix).pack())
         self.vbo.bind()
+        self.vbo_styles.bind()
         GL.glEnable(GL.GL_POINT_SPRITE)
         GL.glPointSize(self.point_size)
         GL.glDrawArrays(GL.GL_POINTS, 0, self.points.size//3)

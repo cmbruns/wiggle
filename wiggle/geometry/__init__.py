@@ -35,6 +35,6 @@ class Vec3(object):
 
 
 def normalize(v):
-    norm = v.norm()
-    # norm = numpy.linalg.norm(v)
+    # norm = v.norm()
+    norm = numpy.linalg.norm(v)
     return v * 1.0/norm

@@ -48,6 +48,7 @@ class SceneCanvas(QOpenGLWidget):
         rotation_axis = (scale * dy, scale * dx, 0)
         angle = 0.01 * (abs(dx) + abs(dy))
         self.camera.rotate(rotation_axis, angle)
+        self.camera.set_y_up()
         self.update()
 
     def mousePressEvent(self, event):

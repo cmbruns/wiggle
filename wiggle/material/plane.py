@@ -26,7 +26,8 @@ class PlaneMaterial(BaseMaterial):
         self.render_mode_index = None
         self.render_mode = self.RenderMode.EQUIRECTANGULAR
         self.texture = Texture(
-            file_name='R0010347.jpg',
+            # file_name='R0010347.jpg',
+            file_name='_0010782_stitch2.jpg',
             package='wiggle.images',
             is_equirectangular=True)
 

@@ -2,7 +2,7 @@ import sys
 
 from PyQt5 import QtCore
 
-from wiggle.app.gui.glcube_app import GlCubeApplication
+from wiggle.app.qt.glcube_app import GlCubeApplication
 
 
 def main():

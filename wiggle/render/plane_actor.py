@@ -5,10 +5,10 @@ from wiggle.render.mesh_actor import MeshActor
 
 
 class PlaneActor(MeshActor):
-    def __init__(self):
+    def __init__(self, texture=None):
         super().__init__(
             mesh=ScreenQuadMesh(),
-            material=PlaneMaterial(),
+            material=PlaneMaterial(texture=texture),
             wireframe_material=PlaneHorizonLineMaterial(),
             render_pass=wiggle.render.base.RenderPassType.GROUND,
         )

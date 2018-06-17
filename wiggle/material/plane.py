@@ -21,15 +21,18 @@ class PlaneMaterial(BaseMaterial):
         TEX_COORD = 3
         EQUIRECTANGULAR = 4
 
-    def __init__(self):
+    def __init__(self, texture=None):
         super().__init__()
         self.render_mode_index = None
         self.render_mode = self.RenderMode.EQUIRECTANGULAR
-        self.texture = Texture(
-            # file_name='R0010347.jpg',
-            file_name='_0010782_stitch2.jpg',
-            package='wiggle.images',
-            is_equirectangular=True)
+        if texture is None:
+            self.texture = Texture(
+                # file_name='R0010347.jpg',
+                file_name='_0010782_stitch2.jpg',
+                package='wiggle.images',
+                is_equirectangular=True)
+        else:
+            self.texture = texture
 
     def create_vertex_shader(self):
         return ShaderStage(

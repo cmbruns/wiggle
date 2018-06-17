@@ -6,9 +6,9 @@ from wiggle.material.nothing import NothingMaterial
 
 
 class SkyBoxActor(MeshActor):
-    def __init__(self, material=None):
+    def __init__(self, material=None, texture=None):
         if material is None:
-            material = SkyBoxMaterial()
+            material = SkyBoxMaterial(texture=texture)
         super().__init__(
             mesh=ScreenQuadMesh(),
             material=material,

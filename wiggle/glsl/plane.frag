@@ -10,6 +10,8 @@ uniform int render_mode = RENDER_MODE_EQUIRECTANGULAR;
 
 uniform sampler2D image;
 uniform vec3 plane_color = vec3(0.5);
+uniform vec3 pano_pos_w;
+uniform mat3 pano_rotation;
 
 in vec4 intersection_m;  // in model space
 in vec4 intersection_w;  // in world space
@@ -70,19 +72,6 @@ vec4 image_color(vec2 tc)
     return texture(image, tc);
 }
 
-mat4 rotationMatrix(vec3 axis, float angle)
-{
-    axis = normalize(axis);
-    float s = -sin(angle);
-    float c = cos(angle);
-    float oc = 1.0 - c;
-
-    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                0.0,                                0.0,                                0.0,                                1.0);
-}
-
 vec4 solid_color(vec2 tc)
 {
     return vec4(plane_color, 1);
@@ -92,14 +81,10 @@ vec4 solid_color(vec2 tc)
 
 vec4 equirect()
 {
-    // todo: generalize photosphere orientation
-    const vec4 theta_view_pos_w = vec4(-0.09, 1.51, 0.05, 1);
-    mat4 theta_rotation = rotationMatrix(vec3(0, 1, 0), -radians(27));
-    //
     vec4 p = intersection_w; // avoid subtraction problem with negative w
     if (p.w < 0) p *= -1;
-    vec3 view_dir = p.xyz - theta_view_pos_w.xyz * p.w / theta_view_pos_w.w;
-    vec3 view_dir_rot = (theta_rotation * vec4(view_dir, 0)).xyz;
+    vec3 view_dir = p.xyz - pano_pos_w * p.w;
+    vec3 view_dir_rot = pano_rotation * view_dir;
     return equirect_color(view_dir_rot, image);
 }
 

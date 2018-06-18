@@ -33,6 +33,9 @@ class Vec3(object):
     def norm(self):
         return numpy.linalg.norm(self._arr)
 
+    def pack(self):
+        return self._arr
+
 
 def normalize(v):
     # norm = v.norm()
